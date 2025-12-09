@@ -1,0 +1,29 @@
+# Bitbucket Configuration
+bitbucket:
+  workspace: "sample777" # Your Bitbucket workspace name (e.g., "mycompany")
+  repository: "myproject" # Your Bitbucket repository name (e.g., "my-app")
+  oauth_key: "YOUR_BITBUCKET_OAUTH_KEY" # OAuth Consumer Key
+  oauth_secret: "YOUR_BITBUCKET_OAUTH_SECRET" # OAuth Consumer Secret
+
+# GitHub Configuration
+github:
+  owner: "ADKWDHQWQHDQI" # GitHub organization or username (e.g., "mycompany" or "myusername")
+  repository: "docagent-foundry" # GitHub repository name (e.g., "my-app")
+  token: "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN" # GitHub Personal Access Token (Generate from: https://github.com/settings/tokens)
+  # Note: Token needs 'repo' scope for full repository access
+
+# Logging Configuration
+logging:
+  closed_pr_archive: "./logs/closed_prs.json" # All closed PRs (merged, declined, superseded) with status field
+  failed_prs: "./logs/failed_prs.json" # Open PRs that failed to migrate
+  migration_summary: "./logs/migration_summary.log" # Detailed migration logs
+  # Note: Using explicit relative paths (./logs/) prevents empty dirname issues
+  # You can also use absolute paths like: "C:/path/to/logs/file.json"
+
+# Test Mode Configuration (optional)
+test_mode:
+  enabled: true # Set to true to enable test mode
+  test_repo:
+    owner: "ADKWDHQWQHDQI" # GitHub test repository owner (for dry-run testing)
+    repository: "docagent-foundry" # GitHub test repository name (for dry-run testing)
+  # When test_mode.enabled=true, PRs will be created in test_repo instead of the main repo

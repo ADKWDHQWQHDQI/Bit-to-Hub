@@ -1,0 +1,477 @@
+2025-12-09 12:45:06,447 - __main__ - WARNING - 
+**********************************************************************
+2025-12-09 12:45:06,447 - __main__ - WARNING - DRY-RUN MODE: No changes will be made to GitHub
+2025-12-09 12:45:06,447 - __main__ - WARNING - **********************************************************************
+
+2025-12-09 12:45:06,448 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 12:45:07,305 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 12:45:08,008 - __main__ - INFO - 
+======================================================================
+2025-12-09 12:45:08,008 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 12:45:08,009 - __main__ - INFO - ======================================================================
+2025-12-09 12:45:16,863 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 12:45:16,873 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 12:45:16,884 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 12:45:16,893 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 12:45:16,902 - __main__ - INFO - 
+======================================================================
+2025-12-09 12:45:16,902 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 12:45:16,903 - __main__ - INFO - ======================================================================
+2025-12-09 12:45:16,903 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 12:45:16,903 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 12:45:16,903 - __main__ - INFO -   - Total: 4
+2025-12-09 12:45:16,904 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 12:45:16,904 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 12:45:16,904 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 12:45:16,904 - __main__ - INFO -   - Total: 4
+2025-12-09 12:45:16,905 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 12:45:16,905 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 12:45:16,905 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 12:45:16,905 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 12:45:16,906 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 12:45:16,906 - __main__ - INFO - ======================================================================
+2025-12-09 12:45:16,906 - __main__ - INFO - 
+Completed at: 2025-12-09 12:45:16
+2025-12-09 12:58:28,010 - __main__ - WARNING - Test mode requested but not enabled in config.yaml
+2025-12-09 12:58:28,010 - __main__ - WARNING - Set test_mode.enabled=true and configure test_repo
+2025-12-09 12:59:45,868 - __main__ - WARNING - Test mode requested but not enabled in config.yaml
+2025-12-09 12:59:45,868 - __main__ - WARNING - Set test_mode.enabled=true and configure test_repo
+2025-12-09 12:59:58,156 - __main__ - WARNING - 
+**********************************************************************
+2025-12-09 12:59:58,156 - __main__ - WARNING - TEST MODE: PRs will be created in ADKWDHQWQHDQI/docagent-foundry
+2025-12-09 12:59:58,157 - __main__ - WARNING - **********************************************************************
+
+2025-12-09 12:59:58,158 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 12:59:59,074 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 12:59:59,879 - __main__ - INFO - 
+======================================================================
+2025-12-09 12:59:59,880 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 12:59:59,880 - __main__ - INFO - ======================================================================
+2025-12-09 13:00:09,446 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 13:00:09,456 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 13:00:09,466 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 13:00:09,477 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 13:00:11,603 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:12,883 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:14,631 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:16,291 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:17,965 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:22,145 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:23,459 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:25,168 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:26,934 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:28,759 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:32,944 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:34,276 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:39,044 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:43,642 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:44,919 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:46,671 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:48,342 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 13:00:49,973 - __main__ - INFO - 
+======================================================================
+2025-12-09 13:00:49,973 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 13:00:49,973 - __main__ - INFO - ======================================================================
+2025-12-09 13:00:49,974 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 13:00:49,974 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 13:00:49,974 - __main__ - INFO -   - Total: 4
+2025-12-09 13:00:49,974 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 13:00:49,975 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 13:00:49,975 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 13:00:49,975 - __main__ - INFO -   - Total: 4
+2025-12-09 13:00:49,976 - __main__ - INFO -   - ✔️  Merged: 6
+2025-12-09 13:00:49,976 - __main__ - INFO -   - ✖️  Declined: 2
+2025-12-09 13:00:49,976 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 13:00:49,976 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 13:00:49,977 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 13:00:49,977 - __main__ - INFO - ======================================================================
+2025-12-09 13:00:49,977 - __main__ - INFO - 
+Completed at: 2025-12-09 13:00:49
+2025-12-09 14:06:24,318 - __main__ - WARNING - 
+**********************************************************************
+2025-12-09 14:06:24,318 - __main__ - WARNING - DRY-RUN MODE: No changes will be made to GitHub
+2025-12-09 14:06:24,318 - __main__ - WARNING - **********************************************************************
+
+2025-12-09 14:06:24,319 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:06:24,955 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:06:25,623 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:06:25,623 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:06:25,623 - __main__ - INFO - ======================================================================
+2025-12-09 14:06:34,107 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:06:34,119 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:06:34,130 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:06:34,142 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:06:34,152 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:06:34,152 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:06:34,153 - __main__ - INFO - ======================================================================
+2025-12-09 14:06:34,153 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:06:34,153 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:06:34,154 - __main__ - INFO -   - Total: 4
+2025-12-09 14:06:34,154 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 14:06:34,154 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 14:06:34,154 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:06:34,155 - __main__ - INFO -   - Total: 4
+2025-12-09 14:06:34,155 - __main__ - INFO -   - ✔️  Merged: 9
+2025-12-09 14:06:34,155 - __main__ - INFO -   - ✖️  Declined: 3
+2025-12-09 14:06:34,156 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:06:34,156 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:06:34,156 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:06:34,156 - __main__ - INFO - ======================================================================
+2025-12-09 14:06:34,157 - __main__ - INFO - 
+Completed at: 2025-12-09 14:06:34
+2025-12-09 14:11:01,614 - __main__ - WARNING - 
+**********************************************************************
+2025-12-09 14:11:01,614 - __main__ - WARNING - DRY-RUN MODE: No changes will be made to GitHub
+2025-12-09 14:11:01,615 - __main__ - WARNING - **********************************************************************
+
+2025-12-09 14:11:01,616 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:11:02,372 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:11:03,074 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:11:03,074 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:11:03,074 - __main__ - INFO - ======================================================================
+2025-12-09 14:11:11,550 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:11:11,562 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:11:11,574 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:11:11,586 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:11:11,586 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:11:11,586 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:11:11,586 - __main__ - INFO - ======================================================================
+2025-12-09 14:11:11,587 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:11:11,587 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:11:11,587 - __main__ - INFO -   - Total: 4
+2025-12-09 14:11:11,588 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 14:11:11,588 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 14:11:11,588 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:11:11,588 - __main__ - INFO -   - Total: 4
+2025-12-09 14:11:11,589 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:11:11,589 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:11:11,589 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:11:11,589 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:11:11,590 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:11:11,590 - __main__ - INFO - ======================================================================
+2025-12-09 14:11:11,590 - __main__ - INFO - 
+Completed at: 2025-12-09 14:11:11
+2025-12-09 14:29:10,921 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:29:11,783 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:29:12,597 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:29:12,598 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:29:12,598 - __main__ - INFO - ======================================================================
+2025-12-09 14:29:23,052 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:29:23,073 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:29:23,086 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:29:23,097 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:29:25,610 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:27,092 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:28,794 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:30,627 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:32,575 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:37,176 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:38,647 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:40,553 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:42,191 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:44,040 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:48,643 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:50,085 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:52,026 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:56,638 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:58,111 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:29:59,812 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:30:01,760 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:30:03,502 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:30:03,502 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:30:03,503 - __main__ - INFO - ======================================================================
+2025-12-09 14:30:03,503 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:30:03,503 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:30:03,504 - __main__ - INFO -   - Total: 4
+2025-12-09 14:30:03,504 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 14:30:03,504 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 14:30:03,505 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:30:03,505 - __main__ - INFO -   - Total: 4
+2025-12-09 14:30:03,505 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:30:03,505 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:30:03,506 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:30:03,506 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:30:03,506 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:30:03,507 - __main__ - INFO - ======================================================================
+2025-12-09 14:30:03,507 - __main__ - INFO - 
+Completed at: 2025-12-09 14:30:03
+2025-12-09 14:32:59,977 - __main__ - WARNING - 
+**********************************************************************
+2025-12-09 14:32:59,977 - __main__ - WARNING - DRY-RUN MODE: No changes will be made to GitHub
+2025-12-09 14:32:59,978 - __main__ - WARNING - **********************************************************************
+
+2025-12-09 14:32:59,979 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:33:00,848 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:33:01,668 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:33:01,669 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:33:01,670 - __main__ - INFO - ======================================================================
+2025-12-09 14:33:11,400 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:33:11,425 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:33:11,439 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:33:11,451 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:33:11,451 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:33:11,452 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:33:11,452 - __main__ - INFO - ======================================================================
+2025-12-09 14:33:11,452 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:33:11,453 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:33:11,453 - __main__ - INFO -   - Total: 4
+2025-12-09 14:33:11,453 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 14:33:11,453 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 14:33:11,453 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:33:11,454 - __main__ - INFO -   - Total: 4
+2025-12-09 14:33:11,454 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:33:11,454 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:33:11,454 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:33:11,455 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:33:11,455 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:33:11,455 - __main__ - INFO - ======================================================================
+2025-12-09 14:33:11,456 - __main__ - INFO - 
+Completed at: 2025-12-09 14:33:11
+2025-12-09 14:33:28,643 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:33:29,628 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:33:30,548 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:33:30,548 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:33:30,548 - __main__ - INFO - ======================================================================
+2025-12-09 14:33:40,188 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:33:40,198 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:33:40,210 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:33:40,221 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:33:42,423 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:34:21,545 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:34:21,545 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:34:21,545 - __main__ - INFO - ======================================================================
+2025-12-09 14:34:21,545 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:34:21,546 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:34:21,584 - __main__ - INFO -   - Total: 4
+2025-12-09 14:34:21,584 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 14:34:21,585 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 14:34:21,586 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:34:21,586 - __main__ - INFO -   - Total: 4
+2025-12-09 14:34:21,587 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:34:21,587 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:34:21,588 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:34:21,589 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:34:21,589 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:34:21,589 - __main__ - INFO - ======================================================================
+2025-12-09 14:34:21,589 - __main__ - INFO - 
+Completed at: 2025-12-09 14:34:21
+2025-12-09 14:34:22,390 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:34:23,081 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:34:23,902 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:34:23,903 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:34:23,903 - __main__ - INFO - ======================================================================
+2025-12-09 14:34:33,018 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:34:33,029 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:34:33,041 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:34:33,053 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:34:35,948 - clients.github_client - WARNING - PR already exists with head=docs/update-readme and base=main (GitHub PR(s): [29])
+2025-12-09 14:34:35,950 - utils.pr_logger - ERROR - Logged failed PR #6: PR already exists with head=docs/update-readme and base=main (GitHub PR(s): [29])
+2025-12-09 14:34:39,254 - clients.github_client - WARNING - PR already exists with head=feature/api-integration and base=main (GitHub PR(s): [30])
+2025-12-09 14:34:39,277 - utils.pr_logger - ERROR - Logged failed PR #8: PR already exists with head=feature/api-integration and base=main (GitHub PR(s): [30])
+2025-12-09 14:34:42,635 - clients.github_client - WARNING - PR already exists with head=bugfix/fix-login-error and base=main (GitHub PR(s): [31])
+2025-12-09 14:34:42,654 - utils.pr_logger - ERROR - Logged failed PR #5: PR already exists with head=bugfix/fix-login-error and base=main (GitHub PR(s): [31])
+2025-12-09 14:34:45,983 - clients.github_client - WARNING - PR already exists with head=feature/add-authentication and base=main (GitHub PR(s): [32])
+2025-12-09 14:34:46,007 - utils.pr_logger - ERROR - Logged failed PR #4: PR already exists with head=feature/add-authentication and base=main (GitHub PR(s): [32])
+2025-12-09 14:34:46,008 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:34:46,008 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:34:46,008 - __main__ - INFO - ======================================================================
+2025-12-09 14:34:46,008 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:34:46,008 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:34:46,012 - __main__ - INFO -   - Total: 4
+2025-12-09 14:34:46,012 - __main__ - INFO -   - ✅ Successfully migrated: 0
+2025-12-09 14:34:46,013 - __main__ - INFO -   - ❌ Failed: 4
+2025-12-09 14:34:46,014 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:34:46,015 - __main__ - INFO -   - Total: 4
+2025-12-09 14:34:46,015 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:34:46,016 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:34:46,017 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:34:46,018 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:34:46,019 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:34:46,019 - __main__ - INFO -   - Failed migrations: ./logs/failed_prs.json
+2025-12-09 14:34:46,019 - __main__ - INFO - ======================================================================
+2025-12-09 14:34:46,019 - __main__ - INFO - 
+Completed at: 2025-12-09 14:34:46
+2025-12-09 14:34:50,489 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:34:51,445 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:34:52,186 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:34:52,187 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:34:52,187 - __main__ - INFO - ======================================================================
+2025-12-09 14:35:01,921 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:35:01,934 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:35:01,945 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:35:01,956 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:35:04,955 - clients.github_client - WARNING - PR already exists with head=docs/update-readme and base=main (GitHub PR(s): [29])
+2025-12-09 14:35:04,968 - utils.pr_logger - ERROR - Logged failed PR #6: PR already exists with head=docs/update-readme and base=main (GitHub PR(s): [29])
+2025-12-09 14:35:08,135 - clients.github_client - WARNING - PR already exists with head=feature/api-integration and base=main (GitHub PR(s): [30])
+2025-12-09 14:35:08,179 - utils.pr_logger - ERROR - Logged failed PR #8: PR already exists with head=feature/api-integration and base=main (GitHub PR(s): [30])
+2025-12-09 14:35:11,307 - clients.github_client - WARNING - PR already exists with head=bugfix/fix-login-error and base=main (GitHub PR(s): [31])
+2025-12-09 14:35:11,331 - utils.pr_logger - ERROR - Logged failed PR #5: PR already exists with head=bugfix/fix-login-error and base=main (GitHub PR(s): [31])
+2025-12-09 14:35:14,482 - clients.github_client - WARNING - PR already exists with head=feature/add-authentication and base=main (GitHub PR(s): [32])
+2025-12-09 14:35:14,512 - utils.pr_logger - ERROR - Logged failed PR #4: PR already exists with head=feature/add-authentication and base=main (GitHub PR(s): [32])
+2025-12-09 14:35:14,512 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:35:14,513 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:35:14,513 - __main__ - INFO - ======================================================================
+2025-12-09 14:35:14,514 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:35:14,514 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:35:14,514 - __main__ - INFO -   - Total: 4
+2025-12-09 14:35:14,515 - __main__ - INFO -   - ✅ Successfully migrated: 0
+2025-12-09 14:35:14,515 - __main__ - INFO -   - ❌ Failed: 4
+2025-12-09 14:35:14,515 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:35:14,516 - __main__ - INFO -   - Total: 4
+2025-12-09 14:35:14,516 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:35:14,516 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:35:14,516 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:35:14,517 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:35:14,517 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:35:14,517 - __main__ - INFO -   - Failed migrations: ./logs/failed_prs.json
+2025-12-09 14:35:14,518 - __main__ - INFO - ======================================================================
+2025-12-09 14:35:14,518 - __main__ - INFO - 
+Completed at: 2025-12-09 14:35:14
+2025-12-09 14:37:19,111 - __main__ - WARNING - 
+**********************************************************************
+2025-12-09 14:37:19,111 - __main__ - WARNING - DRY-RUN MODE: No changes will be made to GitHub
+2025-12-09 14:37:19,111 - __main__ - WARNING - **********************************************************************
+
+2025-12-09 14:37:19,112 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:37:19,922 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:37:20,658 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:37:20,658 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:37:20,659 - __main__ - INFO - ======================================================================
+2025-12-09 14:37:31,191 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:37:31,204 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:37:31,217 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:37:31,229 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:37:31,230 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:37:31,230 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:37:31,230 - __main__ - INFO - ======================================================================
+2025-12-09 14:37:31,230 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:37:31,231 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:37:31,231 - __main__ - INFO -   - Total: 4
+2025-12-09 14:37:31,231 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 14:37:31,231 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 14:37:31,232 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:37:31,232 - __main__ - INFO -   - Total: 4
+2025-12-09 14:37:31,232 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:37:31,232 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:37:31,233 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:37:31,233 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:37:31,233 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:37:31,233 - __main__ - INFO - ======================================================================
+2025-12-09 14:37:31,234 - __main__ - INFO - 
+Completed at: 2025-12-09 14:37:31
+2025-12-09 14:38:00,686 - __main__ - WARNING - 
+**********************************************************************
+2025-12-09 14:38:00,689 - __main__ - WARNING - DRY-RUN MODE: No changes will be made to GitHub
+2025-12-09 14:38:00,692 - __main__ - WARNING - **********************************************************************
+
+2025-12-09 14:38:00,696 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:38:01,573 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:38:02,528 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:38:02,529 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:38:02,529 - __main__ - INFO - ======================================================================
+2025-12-09 14:38:11,940 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:38:11,955 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:38:11,965 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:38:11,976 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:38:11,977 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:38:11,977 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:38:11,977 - __main__ - INFO - ======================================================================
+2025-12-09 14:38:11,978 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:38:11,978 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:38:11,978 - __main__ - INFO -   - Total: 4
+2025-12-09 14:38:11,978 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 14:38:11,979 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 14:38:11,979 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:38:11,979 - __main__ - INFO -   - Total: 4
+2025-12-09 14:38:11,979 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:38:11,979 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:38:11,980 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:38:11,980 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:38:11,980 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:38:11,981 - __main__ - INFO - ======================================================================
+2025-12-09 14:38:11,981 - __main__ - INFO - 
+Completed at: 2025-12-09 14:38:11
+2025-12-09 14:48:38,183 - utils.user_mapper - WARNING - No user mappings found in user_mapping.yaml
+2025-12-09 14:48:39,262 - clients.bitbucket_client - INFO - OAuth token obtained, expires in 7200 seconds
+2025-12-09 14:48:40,490 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:48:40,490 - __main__ - INFO - BITBUCKET TO GITHUB PR MIGRATION
+2025-12-09 14:48:40,491 - __main__ - INFO - ======================================================================
+2025-12-09 14:48:51,295 - utils.pr_logger - INFO - Logged MERGED PR #7: Refactor: Add caching for better performance to closed_prs.json
+2025-12-09 14:48:51,318 - utils.pr_logger - INFO - Logged MERGED PR #1: Add login page feature to closed_prs.json
+2025-12-09 14:48:51,330 - utils.pr_logger - INFO - Logged MERGED PR #3: Bugfix/navbar to closed_prs.json
+2025-12-09 14:48:51,342 - utils.pr_logger - INFO - Logged DECLINED PR #2: Feature/order page to closed_prs.json
+2025-12-09 14:48:53,688 - utils.user_mapper - WARNING - No mapping found for Bitbucket user: sample777. Consider adding this user to user_mapping.yaml for proper attribution.
+2025-12-09 14:49:31,373 - __main__ - INFO - 
+======================================================================
+2025-12-09 14:49:31,374 - __main__ - INFO - MIGRATION SUMMARY
+2025-12-09 14:49:31,374 - __main__ - INFO - ======================================================================
+2025-12-09 14:49:31,375 - __main__ - INFO - Total PRs processed: 8
+2025-12-09 14:49:31,376 - __main__ - INFO - 
+📂 Open PRs:
+2025-12-09 14:49:31,377 - __main__ - INFO -   - Total: 4
+2025-12-09 14:49:31,377 - __main__ - INFO -   - ✅ Successfully migrated: 4
+2025-12-09 14:49:31,378 - __main__ - INFO -   - ❌ Failed: 0
+2025-12-09 14:49:31,379 - __main__ - INFO - 
+📂 Closed PRs (Not Migrated - Logged):
+2025-12-09 14:49:31,380 - __main__ - INFO -   - Total: 4
+2025-12-09 14:49:31,381 - __main__ - INFO -   - ✔️  Merged: 3
+2025-12-09 14:49:31,381 - __main__ - INFO -   - ✖️  Declined: 1
+2025-12-09 14:49:31,382 - __main__ - INFO -   - 🔄 Superseded: 0
+2025-12-09 14:49:31,383 - __main__ - INFO - 
+📄 Log Files:
+2025-12-09 14:49:31,384 - __main__ - INFO -   - Closed PRs (merged/declined/superseded): ./logs/closed_prs.json
+2025-12-09 14:49:31,385 - __main__ - INFO - ======================================================================
+2025-12-09 14:49:31,386 - __main__ - INFO - 
+Completed at: 2025-12-09 14:49:31

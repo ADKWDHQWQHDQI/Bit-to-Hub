@@ -1,0 +1,90 @@
+[
+  {
+    "pr_id": 6,
+    "title": "Update README with installation instructions",
+    "reason": "PR already exists with head=docs/update-readme and base=main (GitHub PR(s): [29])",
+    "error_details": "Source: docs/update-readme -> Destination: main",
+    "source_branch": "docs/update-readme",
+    "destination_branch": "main",
+    "author": "sample777",
+    "created_date": "2025-12-08T14:20:14.362073+00:00",
+    "failed_at": "2025-12-09T14:34:35.949464"
+  },
+  {
+    "pr_id": 8,
+    "title": "Feature: External API integration",
+    "reason": "PR already exists with head=feature/api-integration and base=main (GitHub PR(s): [30])",
+    "error_details": "Source: feature/api-integration -> Destination: main",
+    "source_branch": "feature/api-integration",
+    "destination_branch": "main",
+    "author": "sample777",
+    "created_date": "2025-12-08T14:20:31.677296+00:00",
+    "failed_at": "2025-12-09T14:34:39.276204"
+  },
+  {
+    "pr_id": 5,
+    "title": "Fix: Handle empty password in login",
+    "reason": "PR already exists with head=bugfix/fix-login-error and base=main (GitHub PR(s): [31])",
+    "error_details": "Source: bugfix/fix-login-error -> Destination: main",
+    "source_branch": "bugfix/fix-login-error",
+    "destination_branch": "main",
+    "author": "sample777",
+    "created_date": "2025-12-08T14:20:07.133522+00:00",
+    "failed_at": "2025-12-09T14:34:42.652967"
+  },
+  {
+    "pr_id": 4,
+    "title": "Add user authentication",
+    "reason": "PR already exists with head=feature/add-authentication and base=main (GitHub PR(s): [32])",
+    "error_details": "Source: feature/add-authentication -> Destination: main",
+    "source_branch": "feature/add-authentication",
+    "destination_branch": "main",
+    "author": "sample777",
+    "created_date": "2025-12-08T14:19:58.020902+00:00",
+    "failed_at": "2025-12-09T14:34:46.006784"
+  },
+  {
+    "pr_id": 6,
+    "title": "Update README with installation instructions",
+    "reason": "PR already exists with head=docs/update-readme and base=main (GitHub PR(s): [29])",
+    "error_details": "Source: docs/update-readme -> Destination: main",
+    "source_branch": "docs/update-readme",
+    "destination_branch": "main",
+    "author": "sample777",
+    "created_date": "2025-12-08T14:20:14.362073+00:00",
+    "failed_at": "2025-12-09T14:35:04.968039"
+  },
+  {
+    "pr_id": 8,
+    "title": "Feature: External API integration",
+    "reason": "PR already exists with head=feature/api-integration and base=main (GitHub PR(s): [30])",
+    "error_details": "Source: feature/api-integration -> Destination: main",
+    "source_branch": "feature/api-integration",
+    "destination_branch": "main",
+    "author": "sample777",
+    "created_date": "2025-12-08T14:20:31.677296+00:00",
+    "failed_at": "2025-12-09T14:35:08.177939"
+  },
+  {
+    "pr_id": 5,
+    "title": "Fix: Handle empty password in login",
+    "reason": "PR already exists with head=bugfix/fix-login-error and base=main (GitHub PR(s): [31])",
+    "error_details": "Source: bugfix/fix-login-error -> Destination: main",
+    "source_branch": "bugfix/fix-login-error",
+    "destination_branch": "main",
+    "author": "sample777",
+    "created_date": "2025-12-08T14:20:07.133522+00:00",
+    "failed_at": "2025-12-09T14:35:11.330128"
+  },
+  {
+    "pr_id": 4,
+    "title": "Add user authentication",
+    "reason": "PR already exists with head=feature/add-authentication and base=main (GitHub PR(s): [32])",
+    "error_details": "Source: feature/add-authentication -> Destination: main",
+    "source_branch": "feature/add-authentication",
+    "destination_branch": "main",
+    "author": "sample777",
+    "created_date": "2025-12-08T14:19:58.020902+00:00",
+    "failed_at": "2025-12-09T14:35:14.511523"
+  }
+]

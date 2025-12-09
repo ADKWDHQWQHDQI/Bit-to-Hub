@@ -1,0 +1,5 @@
+# Logs directory for PR migration tool
+# This directory contains:
+# - closed_pr_archive.json: All closed/merged/declined PRs from Bitbucket
+# - failed_prs.json: PRs that failed to migrate with error details
+# - migration_summary.log: Complete migration log with timestamps

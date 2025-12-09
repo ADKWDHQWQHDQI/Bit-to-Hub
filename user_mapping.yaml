@@ -1,0 +1,29 @@
+# User Mapping: Bitbucket users to GitHub users
+# Format:
+#   bitbucket_username: github_username
+
+# IMPORTANT: Use Bitbucket usernames (not display names)
+# To find Bitbucket usernames:
+#   1. Go to Bitbucket user profile
+#   2. URL shows: bitbucket.org/{workspace}/~{username}
+#   3. Use the username (after ~) in this mapping
+
+# This mapping is used for:
+# 1. PR author attribution (@mentioned in PR body if mapped)
+# 2. PR reviewers (assigned on GitHub if mapped and has access)
+# 3. Comment authors (prefixed with @ in comments if mapped)
+
+# Example mappings (replace with actual users):
+# john_doe: johndoe-github         # Bitbucket username -> GitHub username
+# jane_smith: janesmith            # Simple case
+# bob123: bob-wilson               # Different GitHub username
+# alice.jones: alice-j             # Common pattern
+
+# Important Notes:
+# - Use Bitbucket USERNAMES (not display names like "John Doe")
+# - GitHub usernames are case-sensitive
+# - Unmapped users will show as: "Original Author: username" (without @)
+# - Unmapped reviewers will be logged in PR comment for manual assignment
+# - Account IDs (like 712020:634d...) are automatically skipped
+
+# Add your user mappings below:
