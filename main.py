@@ -632,7 +632,7 @@ class PRMigrationOrchestrator:
             comment_count = len(pr.comments)
             total_comments += comment_count
             
-            inline_count = sum(1 for c in pr.comments if c.inline and c.line_number)
+            inline_count = sum(1 for c in pr.comments if c.inline is not None)
             total_inline_comments += inline_count
             total_general_comments += (comment_count - inline_count)
             
