@@ -553,6 +553,250 @@ class PRMigrationOrchestrator:
         
         return True
     
+    def run_audit(self):
+        """Run audit mode to analyze PRs and show detailed statistics"""
+        try:
+            print("\n" + "=" * 70)
+            print("          BITBUCKET PR AUDIT & ANALYSIS")
+            print("=" * 70)
+            
+            # Validate credentials
+            print("\n🔐 Validating credentials...")
+            if not self._validate_credentials():
+                print("\n❌ Credential validation failed. Please check your configuration.")
+                print("=" * 70 + "\n")
+                sys.exit(1)
+            print("   ✓ All credentials validated successfully\n")
+            
+            # Fetch all PRs
+            print(f"🔍 Fetching pull requests from Bitbucket...")
+            print(f"   Repository: {self.bitbucket_client.workspace}/{self.bitbucket_client.repository}")
+            all_prs = self.fetch_all_prs()
+            
+            if not all_prs:
+                print("\n⚠️  No pull requests found")
+                return
+            
+            print(f"   ✓ Found {len(all_prs)} PRs\n")
+            
+            # Perform detailed analysis
+            self._analyze_prs(all_prs)
+            
+            print("\n" + "=" * 70)
+            print("✓ Audit completed at " + datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            print("=" * 70 + "\n")
+            
+        except KeyboardInterrupt:
+            print("\n\n⚠️  Audit interrupted by user")
+            sys.exit(1)
+        except Exception as e:
+            print(f"\n❌ Unexpected error during audit: {e}")
+            self.logger.error(f"Unexpected error during audit: {e}", exc_info=True)
+            sys.exit(1)
+    
+    def _analyze_prs(self, all_prs: List[PullRequest]):
+        """Analyze PRs and display comprehensive statistics"""
+        print("📊 Analyzing pull requests...\n")
+        
+        # Basic categorization
+        open_prs = [pr for pr in all_prs if pr.is_open()]
+        closed_prs = [pr for pr in all_prs if pr.is_closed()]
+        merged_prs = [pr for pr in closed_prs if pr.state == 'MERGED']
+        declined_prs = [pr for pr in closed_prs if pr.state == 'DECLINED']
+        superseded_prs = [pr for pr in closed_prs if pr.state == 'SUPERSEDED']
+        
+        # Collect detailed statistics
+        total_comments = 0
+        total_inline_comments = 0
+        total_general_comments = 0
+        total_images = 0
+        total_attachments = 0
+        total_participants = set()
+        total_reviewers = set()
+        total_authors = set()
+        total_tasks = 0
+        resolved_tasks = 0
+        
+        pr_with_tasks = 0
+        pr_with_images = 0
+        pr_with_multiple_reviewers = 0
+        
+        # Analyze each PR
+        for pr in all_prs:
+            # Authors
+            if pr.author:
+                total_authors.add(pr.author)
+                total_participants.add(pr.author)
+            
+            # Comments
+            comment_count = len(pr.comments)
+            total_comments += comment_count
+            
+            inline_count = sum(1 for c in pr.comments if c.inline and c.line_number)
+            total_inline_comments += inline_count
+            total_general_comments += (comment_count - inline_count)
+            
+            # Count images in comments
+            for comment in pr.comments:
+                if comment.content:
+                    # Simple detection: look for image markdown or URLs
+                    image_count = comment.content.count('![') + comment.content.count('.png') + comment.content.count('.jpg') + comment.content.count('.jpeg') + comment.content.count('.gif')
+                    if image_count > 0:
+                        total_images += image_count
+                
+                # Track comment authors as participants
+                if comment.author:
+                    total_participants.add(comment.author)
+            
+            # Reviewers
+            reviewer_count = len(pr.reviewers)
+            for reviewer in pr.reviewers:
+                if reviewer.username:
+                    total_reviewers.add(reviewer.username)
+                    total_participants.add(reviewer.username)
+            
+            if reviewer_count > 1:
+                pr_with_multiple_reviewers += 1
+            
+            # Tasks
+            task_count = len(pr.tasks)
+            if task_count > 0:
+                pr_with_tasks += 1
+                total_tasks += task_count
+                resolved_tasks += sum(1 for task in pr.tasks if task.state == 'RESOLVED')
+        
+        # Display Summary
+        print("=" * 70)
+        print("                    COMPREHENSIVE PR AUDIT REPORT")
+        print("=" * 70)
+        
+        # PR Overview
+        print(f"\n📂 PULL REQUEST OVERVIEW")
+        print(f"   Total PRs: {len(all_prs)}")
+        print(f"   ├─ Open: {len(open_prs)} ({len(open_prs)*100//len(all_prs) if all_prs else 0}%)")
+        print(f"   └─ Closed: {len(closed_prs)} ({len(closed_prs)*100//len(all_prs) if all_prs else 0}%)")
+        if closed_prs:
+            print(f"      ├─ Merged: {len(merged_prs)}")
+            print(f"      ├─ Declined: {len(declined_prs)}")
+            if superseded_prs:
+                print(f"      └─ Superseded: {len(superseded_prs)}")
+        
+        # Comments Analysis
+        print(f"\n💬 COMMENTS ANALYSIS")
+        print(f"   Total Comments: {total_comments}")
+        print(f"   ├─ Inline (code) comments: {total_inline_comments}")
+        print(f"   └─ General comments: {total_general_comments}")
+        if all_prs:
+            avg_comments = total_comments / len(all_prs)
+            print(f"   Average comments per PR: {avg_comments:.1f}")
+        
+        # People Involvement
+        print(f"\n👥 PEOPLE INVOLVEMENT")
+        print(f"   Total Participants: {len(total_participants)} unique users")
+        print(f"   ├─ Authors: {len(total_authors)}")
+        print(f"   ├─ Reviewers: {len(total_reviewers)}")
+        print(f"   └─ Commenters: {len(total_participants) - len(total_authors)}")
+        
+        # Reviewers Details
+        print(f"\n👁️  REVIEW STATISTICS")
+        print(f"   PRs with reviewers: {sum(1 for pr in all_prs if pr.reviewers)}")
+        print(f"   PRs with 2+ reviewers: {pr_with_multiple_reviewers}")
+        if all_prs:
+            avg_reviewers = sum(len(pr.reviewers) for pr in all_prs) / len(all_prs)
+            print(f"   Average reviewers per PR: {avg_reviewers:.1f}")
+        
+        # Tasks Analysis
+        if total_tasks > 0:
+            print(f"\n✅ TASKS ANALYSIS")
+            print(f"   Total Tasks: {total_tasks}")
+            print(f"   ├─ Resolved: {resolved_tasks} ({resolved_tasks*100//total_tasks if total_tasks else 0}%)")
+            print(f"   └─ Pending: {total_tasks - resolved_tasks}")
+            print(f"   PRs with tasks: {pr_with_tasks}")
+        
+        # Media Analysis
+        if total_images > 0:
+            print(f"\n🖼️  MEDIA CONTENT")
+            print(f"   Images detected: ~{total_images}")
+            print(f"   PRs with images: {pr_with_images}")
+            print(f"   Note: Image migration available during full migration")
+        
+        # Top Contributors
+        if total_authors:
+            print(f"\n🏆 TOP AUTHORS")
+            author_counts = {}
+            for pr in all_prs:
+                if pr.author:
+                    author_counts[pr.author] = author_counts.get(pr.author, 0) + 1
+            
+            top_authors = sorted(author_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+            for i, (author, count) in enumerate(top_authors, 1):
+                print(f"   {i}. {author}: {count} PRs")
+        
+        # PR Size Distribution
+        print(f"\n📏 PR SIZE DISTRIBUTION (by comments)")
+        small_prs = sum(1 for pr in all_prs if len(pr.comments) <= 2)
+        medium_prs = sum(1 for pr in all_prs if 3 <= len(pr.comments) <= 10)
+        large_prs = sum(1 for pr in all_prs if len(pr.comments) > 10)
+        
+        print(f"   Small (0-2 comments): {small_prs}")
+        print(f"   Medium (3-10 comments): {medium_prs}")
+        print(f"   Large (10+ comments): {large_prs}")
+        
+        # Migration Complexity Estimate
+        print(f"\n⚡ MIGRATION COMPLEXITY ESTIMATE")
+        complexity_score = 0
+        complexity_factors = []
+        
+        if total_comments > 100:
+            complexity_score += 2
+            complexity_factors.append(f"High comment volume ({total_comments})")
+        elif total_comments > 50:
+            complexity_score += 1
+            complexity_factors.append(f"Moderate comment volume ({total_comments})")
+        
+        if total_images > 20:
+            complexity_score += 2
+            complexity_factors.append(f"Many images to migrate (~{total_images})")
+        elif total_images > 5:
+            complexity_score += 1
+            complexity_factors.append(f"Some images to migrate (~{total_images})")
+        
+        if len(total_participants) > 20:
+            complexity_score += 1
+            complexity_factors.append(f"Many participants ({len(total_participants)})")
+        
+        if large_prs > 10:
+            complexity_score += 1
+            complexity_factors.append(f"Several large PRs ({large_prs})")
+        
+        if complexity_score == 0:
+            complexity = "LOW ✅"
+        elif complexity_score <= 2:
+            complexity = "MEDIUM ⚠️"
+        else:
+            complexity = "HIGH 🔴"
+        
+        print(f"   Complexity: {complexity}")
+        if complexity_factors:
+            print(f"   Factors:")
+            for factor in complexity_factors:
+                print(f"      • {factor}")
+        
+        # Recommendations
+        print(f"\n💡 RECOMMENDATIONS")
+        if len(open_prs) > 0:
+            print(f"   • {len(open_prs)} open PRs ready for migration")
+        if total_images > 0:
+            print(f"   • Enable image migration in config (bitbucket_token required)")
+        if len(total_participants) > 10:
+            print(f"   • Configure user_mapping.yaml for {len(total_participants)} users")
+        if total_tasks > 0:
+            print(f"   • {total_tasks} tasks will be migrated as PR comments")
+        if len(closed_prs) > 0:
+            print(f"   • {len(closed_prs)} closed PRs can be archived as GitHub issues")
+        
+        print("\n" + "=" * 70)
+    
     def fetch_all_prs(self) -> List[PullRequest]:
         """
         Fetch all pull requests from Bitbucket
@@ -840,6 +1084,9 @@ def main():
   # Test credentials (quick validation)
   python main.py --test-connection
   
+  # Audit mode (analyze PRs without migrating)
+  python main.py --audit
+  
   # Migrate specific PR
   python main.py --pr-numbers 13
   
@@ -867,6 +1114,12 @@ def main():
         '--test-connection',
         action='store_true',
         help='Test API credentials without fetching PRs (quick validation)'
+    )
+    
+    parser.add_argument(
+        '--audit',
+        action='store_true',
+        help='Audit mode: Analyze PRs and show detailed statistics without migrating'
     )
     
     parser.add_argument(
@@ -908,6 +1161,10 @@ def main():
         print("\n" + "=" * 70)
         print("          CONNECTION TEST MODE")
         print("=" * 70)
+    elif args.audit:
+        print("\n" + "=" * 70)
+        print("          AUDIT MODE (Analysis only, no migration)")
+        print("=" * 70)
     elif args.dry_run:
         print("\n" + "=" * 70)
         print("          DRY-RUN MODE (No changes will be made)")
@@ -920,6 +1177,17 @@ def main():
     # Quick connection test mode
     if args.test_connection:
         test_credentials(args.config)
+        return
+    
+    # Audit mode
+    if args.audit:
+        orchestrator = PRMigrationOrchestrator(
+            config_file=args.config,
+            dry_run=False,
+            test_mode=args.test_mode,
+            pr_numbers=None
+        )
+        orchestrator.run_audit()
         return
     
     # Parse PR numbers if provided

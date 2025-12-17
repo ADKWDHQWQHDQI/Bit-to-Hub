@@ -4,6 +4,7 @@ A powerful tool to migrate Pull Requests (PRs) from Bitbucket to GitHub, preserv
 
 ## 🚀 Features
 
+- **Audit Mode**: Comprehensive PR analysis with detailed statistics before migration
 - **Complete PR Migration**: Migrates open PRs with full content preservation
 - **Comment Preservation**: Maintains all PR comments, including nested replies
 - **Review History**: Preserves reviewer information and approval status
@@ -89,6 +90,21 @@ bitbucket_user2: github_user2
 ```
 
 ## 🎯 Usage
+
+### Audit Mode (Recommended First Step)
+
+```bash
+# Analyze PRs and show comprehensive statistics
+python main.py --audit
+```
+
+This mode will:
+
+- ✅ Validate your credentials
+- 📊 Show detailed PR statistics (count, types, comments, images, participants)
+- 📈 Analyze migration complexity
+- 💡 Provide recommendations
+- ⚡ No changes made to any repository
 
 ### Basic Migration
 
