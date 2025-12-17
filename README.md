@@ -1,395 +1,224 @@
-# Bitbucket to GitHub Pull Request Migration Tool
+# Bitbucket to GitHub PR Migration Tool
 
-A Python console application for migrating pull requests from Bitbucket to GitHub, with comprehensive logging, user mapping, and advanced safety features.
+A powerful tool to migrate Pull Requests (PRs) from Bitbucket to GitHub, preserving comments, reviews, tasks, and commit history.
 
-## 🎯 Features
+## 🚀 Features
 
-### Core Features
+- **Complete PR Migration**: Migrates open PRs with full content preservation
+- **Comment Preservation**: Maintains all PR comments, including nested replies
+- **Review History**: Preserves reviewer information and approval status
+- **Task Migration**: Migrates inline tasks and their status
+- **Commit Verification**: Validates that all commits exist in target repository
+- **Closed PR Handling**: Creates GitHub issues for closed/merged PRs for historical reference
+- **User Mapping**: Maps Bitbucket users to GitHub users
+- **Image Migration**: Automatically uploads and migrates embedded images
+- **Credential Validation**: Tests API credentials before starting migration
+- **Progress Tracking**: Real-time progress bars and detailed logging
+- **Flexible Authentication**: Supports both OAuth 2.0 and Bearer token for Bitbucket
 
-- ✅ **List all PRs** from Bitbucket with complete metadata
-- ✅ **Migrate open PRs** to GitHub automatically
-- ✅ **Separate logging** for closed PRs by type (merged, declined, superseded)
-- ✅ **User mapping** from Bitbucket to GitHub usernames
-- ✅ **Comment migration** with original author attribution
-- ✅ **Reviewer assignment** with fallback for unmapped users
-- ✅ **Error handling** with detailed failure logging
+## 📋 Prerequisites
 
-### Advanced Features (New!)
+- Python 3.8 or higher
+- Bitbucket API credentials (OAuth Consumer or App Password)
+- GitHub Personal Access Token with `repo` scope
+- Both repositories must exist and be accessible
 
-- 🆕 **Dry-run mode** - Test without making changes
-- 🆕 **Test repository mode** - Migrate to test repo first
-- 🆕 **Commit validation** - Verify commits exist before creating PRs
-- 🆕 **Fork PR support** - Handle cross-repo PRs correctly
-- 🆕 **Automatic retries** - Exponential backoff for rate limits
-- 🆕 **CLI interface** - Flexible command-line options
-- 🆕 **Package installation** - Install as system command
+## 🔧 Installation
 
-## 📋 Requirements
+### Option 1: Using the Standalone Executable (Recommended for Non-Developers)
 
-- Python 3.8+
-- Bitbucket Cloud account with API Token
-- GitHub account with Personal Access Token
-- Repository and branches already migrated to GitHub
+1. Download the latest release from the [Releases](https://github.com/ADKWDHQWQHDQI/Bit-to-Hub/releases) page
+2. Extract the zip file
+3. Run `PRMigrationTool.exe`
+4. Follow the interactive setup to enter your credentials
 
-## 🚀 Quick Start
+### Option 2: From Source
 
-### 1. Installation
+1. Clone the repository:
 
 ```bash
-# Create virtual environment (recommended)
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
+git clone https://github.com/ADKWDHQWQHDQI/Bit-to-Hub.git
+cd Bit-to-Hub
+```
 
-# Install the package
-pip install -e .
+2. Install dependencies:
 
-# Or install dependencies only
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configuration
+3. Create configuration files:
 
-Edit `config.yaml` with your details:
-
-```yaml
-bitbucket:
-  workspace: "your-workspace"
-  repository: "your-repo"
-  token: "your-bitbucket-api-token"
-
-github:
-  owner: "github-org-or-username"
-  repository: "your-repo"
-  token: "your-github-token"
-
-logging:
-  closed_pr_archive: "./logs/closed_pr_archive.json"
-  failed_prs: "./logs/failed_prs.json"
-  migration_summary: "./logs/migration_summary.log"
-
-# Optional: Test mode
-test_mode:
-  enabled: false
-  test_repo:
-    owner: "your-test-org"
-    repository: "test-repo"
+```bash
+cp config.template.yaml config.yaml
+cp user_mapping.template.yaml user_mapping.yaml
 ```
 
-### 3. User Mapping
+4. Edit `config.yaml` with your credentials and repository details
 
-Edit `user_mapping.yaml`:
+## ⚙️ Configuration
+
+### Bitbucket Setup
+
+**Option 1: OAuth 2.0 (Recommended)**
+
+1. Go to your Bitbucket workspace settings
+2. Navigate to OAuth consumers: `https://bitbucket.org/{workspace}/workspace/settings/api`
+3. Create a new consumer with `Read` permissions for repositories and pull requests
+4. Copy the Key and Secret to `config.yaml`
+
+**Option 2: App Password**
+
+1. Go to Bitbucket account settings: `https://bitbucket.org/account/settings/api-tokens/`
+2. Create an App Password with `Pull requests: Read` permission
+3. Copy the token to `config.yaml`
+
+### GitHub Setup
+
+1. Go to GitHub settings: `https://github.com/settings/tokens`
+2. Generate a Personal Access Token (classic) with `repo` scope
+3. Copy the token to `config.yaml`
+
+### User Mapping (Optional)
+
+Map Bitbucket users to GitHub users in `user_mapping.yaml`:
 
 ```yaml
-# Map Bitbucket users to GitHub users
 bitbucket_user1: github_user1
-john.doe@company.com: johndoe-github
+bitbucket_user2: github_user2
 ```
 
-### 4. Run Migration
+## 🎯 Usage
+
+### Basic Migration
 
 ```bash
-# Recommended: Start with dry-run
+# Test credentials first
+python main.py --test-connection
+
+# Dry run (no changes made)
 python main.py --dry-run
 
-# Test on test repository
-python main.py --test-mode
-
-# Production migration
+# Full migration
 python main.py
 ```
 
-## 🔐 Authentication Setup
-
-### Bitbucket API Token
-
-1. Go to [Bitbucket API Tokens](https://bitbucket.org/account/settings/api-tokens/)
-2. Click "Create API token"
-3. Grant permissions:
-   - ✅ Repositories: Read
-   - ✅ Pull requests: Read
-4. Copy the generated token
-
-**Note:** As of September 2025, Bitbucket uses API tokens instead of app passwords.
-
-### GitHub Personal Access Token
-
-1. Go to [GitHub Token Settings](https://github.com/settings/tokens)
-2. Click "Generate new token (classic)"
-3. Grant scopes:
-   - ✅ `repo` (Full control of private repositories)
-4. Copy the generated token
-
-## 📖 Usage
-
-### Command-Line Interface
+### Migrate Specific PRs
 
 ```bash
-# View all options
-python main.py --help
+# Migrate a single PR
+python main.py --pr-numbers 13
 
-# Dry-run mode (recommended first step)
-python main.py --dry-run
-
-# Test mode (use test repository)
-python main.py --test-mode
-
-# Combine modes
-python main.py --dry-run --test-mode
-
-# Custom config file
-python main.py --config custom_config.yaml
-
-# Normal migration
-python main.py
+# Migrate multiple PRs
+python main.py --pr-numbers 13,14,15
 ```
 
-### What Each Mode Does
-
-#### Dry-Run Mode (`--dry-run`)
-
-- ✅ Fetches all PRs from Bitbucket
-- ✅ Validates configuration
-- ✅ Checks branches and commits
-- ✅ Shows what would be migrated
-- ❌ Does NOT create PRs on GitHub
-
-**Perfect for:** First-time testing, validating configuration
-
-#### Test Mode (`--test-mode`)
-
-- ✅ Creates PRs in test repository (from config)
-- ✅ Safe experimentation
-- ✅ Full migration workflow
-
-**Perfect for:** Training, testing entire process safely
-
-#### Production Mode (no flags)
-
-- ✅ Creates PRs in production repository
-- ✅ Actual migration
-
-**Perfect for:** Final migration after testing
-
-### Recommended Workflow
+### Test Mode
 
 ```bash
-# Step 1: Validate configuration
-python main.py --dry-run
-
-# Step 2: Test on test repository
+# Use test repository (configured in config.yaml)
 python main.py --test-mode
-
-# Step 3: Final validation
-python main.py --dry-run
-
-# Step 4: Execute production migration
-python main.py
 ```
 
-The tool will:
+## 📊 Migration Process
 
-1. **Fetch all PRs** from Bitbucket
-2. **Categorize** them as open or closed
-3. **Log closed PRs** separately by type:
-   - `logs/closed_pr_archive_merged.json`
-   - `logs/closed_pr_archive_declined.json`
-   - `logs/closed_pr_archive_superseded.json`
-4. **Migrate open PRs** to GitHub with:
-   - Original title and description
-   - Author attribution
-   - Comments with author prefixes
-   - Reviewers (mapped users)
-5. **Log failed migrations** to `logs/failed_prs.json`
+1. **Credential Validation**: Tests Bitbucket and GitHub API access
+2. **PR Fetching**: Retrieves all PRs from Bitbucket
+3. **Closed PRs**: Archives closed PRs and creates GitHub issues (optional)
+4. **Open PRs**: Migrates open PRs with full content
+   - Creates PR with title and description
+   - Migrates all comments (including nested replies)
+   - Adds reviewer information
+   - Migrates inline tasks
+   - Verifies commit history
 
-## 📂 Output Structure
-
-```
-logs/
-├── migration_summary.log           # Detailed console output
-├── closed_pr_archive.json          # All closed PRs
-├── closed_pr_archive_merged.json   # Merged PRs only
-├── closed_pr_archive_declined.json # Declined PRs only
-├── closed_pr_archive_superseded.json # Superseded PRs only
-└── failed_prs.json                 # Failed open PR migrations
-```
-
-## 📊 Log File Format
-
-### Closed PR Archive
-
-```json
-[
-  {
-    "id": 123,
-    "title": "Add new feature",
-    "state": "MERGED",
-    "author": "john.doe",
-    "source_branch": "feature/new-feature",
-    "destination_branch": "main",
-    "created_date": "2025-01-15T10:30:00",
-    "closed_date": "2025-01-16T14:20:00",
-    "merge_commit": "abc123def456",
-    "comments": [...],
-    "reviewers": [...],
-    "commits": ["sha1", "sha2"],
-    "logged_at": "2025-12-08T15:45:00",
-    "reason_not_migrated": "PR is MERGED - Only OPEN PRs are migrated"
-  }
-]
-```
-
-### Failed PR Log
-
-```json
-[
-  {
-    "pr_id": 45,
-    "title": "Update dependencies",
-    "reason": "Source branch 'feature/update' does not exist in GitHub",
-    "error_details": "Source: feature/update -> Destination: main",
-    "source_branch": "feature/update",
-    "destination_branch": "main",
-    "author": "jane.smith",
-    "created_date": "2025-02-01T09:00:00",
-    "failed_at": "2025-12-08T15:50:00"
-  }
-]
-```
-
-## 🔧 Configuration Options
-
-### config.yaml
-
-| Section     | Field               | Description                    |
-| ----------- | ------------------- | ------------------------------ |
-| `bitbucket` | `workspace`         | Bitbucket workspace name       |
-| `bitbucket` | `repository`        | Repository name                |
-| `bitbucket` | `token`             | Bitbucket API token            |
-| `github`    | `owner`             | GitHub org or username         |
-| `github`    | `repository`        | Repository name                |
-| `github`    | `token`             | GitHub personal access token   |
-| `logging`   | `closed_pr_archive` | Path for closed PR logs        |
-| `logging`   | `failed_prs`        | Path for failed migration logs |
-
-### user_mapping.yaml
-
-Map Bitbucket users to GitHub users:
+## 📝 Configuration Options
 
 ```yaml
-# Format: bitbucket_user: github_user
-john.doe: johndoe-github
-jane.smith@company.com: janesmith
-bob123: bob-wilson
+migration_options:
+  skip_commit_verification: false # Skip checking if commits exist
+  skip_prs_with_missing_branches: true # Skip PRs with missing source branches
+  create_closed_issues: true # Create issues for closed PRs
 ```
 
-**Important Notes:**
+## 🔨 Building Standalone Executable
 
-- Unmapped PR authors are mentioned in PR body
-- Unmapped reviewers are logged in a comment
-- Unmapped comment authors are prefixed in comments
+```bash
+# Install build dependencies
+pip install -r build_requirements.txt
 
-## ⚠️ Important Considerations
+# Build executable
+python build_exe.py
+```
 
-### What Gets Migrated
+The executable will be created in `client_distribution/PRMigrationTool.exe`
 
-✅ **Open PRs:**
-
-- Title and description
-- Source and destination branches
-- PR author (attributed in body)
-- Comments with author attribution
-- Reviewers (if mapped)
-
-❌ **Not Migrated:**
-
-- Closed PRs (merged, declined, superseded)
-- Build/CI status checks
-- Inline code review comments (converted to general comments)
-- Approval status (reviewers added without approval)
-
-### Limitations
-
-1. **GitHub API Limitations:**
-
-   - PRs must be created as "open"
-   - Cannot impersonate users (all PRs created by token owner)
-   - Cannot set PR creation date (uses current timestamp)
-
-2. **Branch Requirements:**
-
-   - Branches must exist in GitHub before migration
-   - Branch names must match exactly
-
-3. **User Mapping:**
-   - Unmapped users mentioned by Bitbucket name
-   - Manual assignment may be needed for unmapped reviewers
-
-## 🐛 Troubleshooting
-
-### Issue: "Branch does not exist in GitHub"
-
-**Solution:** Ensure all branches from Bitbucket are pushed to GitHub before migration.
-
-### Issue: "GitHub API error: 422"
-
-**Solution:**
-
-- Check if a PR already exists with same head/base
-- Verify branch names are exact matches
-- Ensure token has `repo` scope
-
-### Issue: "No user mappings found"
-
-**Solution:** Add mappings to `user_mapping.yaml` file.
-
-### Issue: "Failed to add reviewers"
-
-**Solution:**
-
-- Verify GitHub usernames in mapping file
-- Check that users have access to the repository
-- Review unmapped reviewers in PR comments
-
-## 📝 Project Structure
+## 📂 Project Structure
 
 ```
 bitbucket-github-pr-migration/
-├── main.py                 # Main orchestrator
-├── config.yaml             # Configuration file
-├── user_mapping.yaml       # User mapping file
-├── requirements.txt        # Python dependencies
-├── README.md              # This file
-├── clients/
-│   ├── bitbucket_client.py # Bitbucket API client
-│   └── github_client.py    # GitHub API client
-├── models/
-│   └── pr_model.py        # PR data models
-├── utils/
-│   ├── pr_logger.py       # Logging utilities
-│   └── user_mapper.py     # User mapping utilities
-└── logs/                  # Generated log files
+├── clients/                  # API clients
+│   ├── bitbucket_client.py  # Bitbucket API wrapper
+│   └── github_client.py     # GitHub API wrapper
+├── models/                   # Data models
+│   └── pr_model.py          # PR, Comment, Review models
+├── utils/                    # Utility modules
+│   ├── user_mapper.py       # User mapping logic
+│   ├── pr_logger.py         # Logging utilities
+│   ├── markdown_converter.py # Markdown conversion
+│   └── image_migrator.py    # Image migration
+├── main.py                   # Main application
+├── config.template.yaml      # Config template
+├── user_mapping.template.yaml # User mapping template
+└── requirements.txt          # Dependencies
 ```
 
-## 🤝 Contributing
+## 🐛 Troubleshooting
 
-This is a custom migration tool. Feel free to adapt it to your needs.
+### Common Issues
+
+**"No commit found for SHA"**
+
+- The repository may have been rebased/squashed during migration
+- Solution: Set `skip_commit_verification: true` in config.yaml
+
+**"Source branch does not exist"**
+
+- The branch was deleted in GitHub
+- Solution: Already handled by default with `skip_prs_with_missing_branches: true`
+
+**"PR already exists"**
+
+- A PR with the same head and base branch already exists
+- Solution: Close or rename the existing PR
+
+**"No mapping found for Bitbucket user"**
+
+- User not found in user_mapping.yaml
+- Solution: Add the mapping or the tool will use the Bitbucket username
 
 ## 📄 License
 
-This project is provided as-is for migration purposes.
+MIT License - See [LICENSE](LICENSE) file for details
 
-## 🆘 Support
+## 🤝 Contributing
 
-For issues:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-1. Check logs in `logs/migration_summary.log`
-2. Review failed PRs in `logs/failed_prs.json`
-3. Verify configuration in `config.yaml`
-4. Ensure branches exist in GitHub
+## 📞 Support
 
----
+For issues and questions, please open an issue on GitHub.
 
-**Created:** December 2025  
-**Python Version:** 3.8+  
-**API Versions:** Bitbucket REST API 2.0, GitHub REST API 2025
+## 📌 Version
+
+**Current Version**: 1.0.0
+**Release Date**: December 17, 2025
+
+## ✨ Features in v1.0
+
+- Initial release with full PR migration capabilities
+- Credential validation before migration
+- Support for OAuth 2.0 and Bearer token authentication
+- Complete comment and review preservation
+- Image migration support
+- Progress tracking and detailed logging

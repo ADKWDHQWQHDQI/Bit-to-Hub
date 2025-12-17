@@ -15,6 +15,10 @@ class PRComment:
     content: str
     created_date: datetime
     updated_date: Optional[datetime] = None
+    inline: Optional[dict] = None  # Inline comment data: {'path': str, 'from': int, 'to': int}
+    parent_id: Optional[int] = None  # ID of parent comment (for replies)
+    parent_author: Optional[str] = None  # Author of parent comment
+    attachments: List[dict] = field(default_factory=list)  # List of attachment files: {'name': str, 'url': str}
     
     def to_dict(self):
         return {
@@ -23,7 +27,11 @@ class PRComment:
             'author_email': self.author_email,
             'content': self.content,
             'created_date': self.created_date.isoformat(),
-            'updated_date': self.updated_date.isoformat() if self.updated_date else None
+            'updated_date': self.updated_date.isoformat() if self.updated_date else None,
+            'inline': self.inline,
+            'parent_id': self.parent_id,
+            'parent_author': self.parent_author,
+            'attachments': self.attachments
         }
 
 
@@ -40,6 +48,35 @@ class PRReviewer:
             'email': self.email,
             'approval_status': self.approval_status
         }
+
+
+@dataclass
+class PRTask:
+    """Represents a task/todo on a pull request"""
+    id: int
+    content: str
+    state: str  # RESOLVED, UNRESOLVED
+    creator: str
+    creator_email: Optional[str]
+    created_date: datetime
+    updated_date: Optional[datetime] = None
+    comment_id: Optional[int] = None  # ID of comment this task is attached to
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content': self.content,
+            'state': self.state,
+            'creator': self.creator,
+            'creator_email': self.creator_email,
+            'created_date': self.created_date.isoformat(),
+            'updated_date': self.updated_date.isoformat() if self.updated_date else None,
+            'comment_id': self.comment_id
+        }
+    
+    def is_resolved(self) -> bool:
+        """Check if task is resolved"""
+        return self.state == 'RESOLVED'
 
 
 @dataclass
@@ -60,6 +97,7 @@ class PullRequest:
     comments: List[PRComment] = field(default_factory=list)
     reviewers: List[PRReviewer] = field(default_factory=list)
     commits: List[str] = field(default_factory=list)  # List of commit SHAs
+    tasks: List[PRTask] = field(default_factory=list)  # List of tasks/todos
     # Additional fields for comprehensive logging
     close_source_commit: Optional[str] = None  # Last commit on source branch when closed
     participants_count: int = 0  # Number of participants
@@ -88,11 +126,13 @@ class PullRequest:
             'comments': [c.to_dict() for c in self.comments],
             'reviewers': [r.to_dict() for r in self.reviewers],
             'commits': self.commits,
+            'tasks': [t.to_dict() for t in self.tasks],
             'participants_count': self.participants_count,
             'task_count': self.task_count,
             'comments_count': len(self.comments),
             'reviewers_count': len(self.reviewers),
             'commits_count': len(self.commits),
+            'tasks_count': len(self.tasks),
             'is_fork': self.is_fork,
             'fork_repo_owner': self.fork_repo_owner,
             'fork_repo_name': self.fork_repo_name

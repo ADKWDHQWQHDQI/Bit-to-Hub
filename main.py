@@ -6,36 +6,270 @@ import logging
 import yaml
 import argparse
 import os
+import shutil
+import getpass
 from datetime import datetime
 from typing import Dict, List, Optional
+from tqdm import tqdm
+from github import Github, Auth, GithubException
 from clients import BitbucketClient, GitHubClient
 from models import PullRequest
 from utils import UserMapper, PRLogger
 
 
+def validate_bitbucket_credentials(workspace, repository, auth_data):
+    """Validate Bitbucket credentials by making a test API call"""
+    import requests
+    
+    try:
+        headers = {'Accept': 'application/json'}
+        
+        if 'oauth_key' in auth_data and 'oauth_secret' in auth_data:
+            # Get OAuth token
+            token_response = requests.post(
+                "https://bitbucket.org/site/oauth2/access_token",
+                auth=(auth_data['oauth_key'], auth_data['oauth_secret']),
+                data={'grant_type': 'client_credentials'},
+                timeout=10
+            )
+            
+            if token_response.status_code != 200:
+                return False, "Invalid OAuth credentials. Please check your Consumer Key and Secret."
+            
+            token_data = token_response.json()
+            access_token = token_data['access_token']
+            headers['Authorization'] = f'Bearer {access_token}'
+        else:
+            # Use Bearer token
+            headers['Authorization'] = f'Bearer {auth_data["token"]}'
+        
+        # Test API call
+        test_url = f"https://api.bitbucket.org/2.0/repositories/{workspace}/{repository}"
+        response = requests.get(test_url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            return True, "✓ Bitbucket credentials validated successfully"
+        elif response.status_code == 401:
+            return False, "Invalid credentials. Authentication failed."
+        elif response.status_code == 404:
+            return False, f"Repository '{workspace}/{repository}' not found. Please check workspace and repository names."
+        else:
+            return False, f"Unexpected error (HTTP {response.status_code}). Please check your credentials."
+    
+    except requests.exceptions.Timeout:
+        return False, "Connection timeout. Please check your internet connection."
+    except requests.exceptions.ConnectionError:
+        return False, "Connection error. Please check your internet connection."
+    except Exception as e:
+        return False, f"Error validating credentials: {str(e)}"
+
+
+def validate_github_credentials(owner, repository, token):
+    """Validate GitHub credentials by making a test API call"""
+    from github import Github, Auth, GithubException
+    
+    try:
+        auth = Auth.Token(token)
+        github = Github(auth=auth, timeout=10)
+        repo = github.get_repo(f"{owner}/{repository}")
+        
+        return True, "✓ GitHub credentials validated successfully"
+    
+    except GithubException as e:
+        if e.status == 401:
+            return False, "Invalid GitHub token. Please check your Personal Access Token."
+        elif e.status == 404:
+            return False, f"Repository '{owner}/{repository}' not found. Please check owner and repository names."
+        else:
+            error_msg = e.data.get('message', str(e)) if hasattr(e, 'data') and e.data else str(e)
+            return False, f"GitHub API error: {error_msg}"
+    except Exception as e:
+        return False, f"Error validating credentials: {str(e)}"
+
+
+def create_config_interactive():
+    """
+    Create config.yaml interactively by prompting user for credentials.
+    This is called when config.yaml doesn't exist (first run).
+    Validates credentials before saving configuration.
+    """
+    print("\n" + "=" * 70)
+    print("  BITBUCKET TO GITHUB PR MIGRATION TOOL - FIRST RUN SETUP")
+    print("=" * 70)
+    print("\nNo config.yaml found. Let's set up your configuration.\n")
+    
+    config = {
+        'bitbucket': {},
+        'github': {},
+        'logging': {
+            'closed_pr_archive': './logs/closed_prs.json',
+            'failed_prs': './logs/failed_prs.json',
+            'migration_summary': './logs/migration_summary.log'
+        },
+        'migration_options': {
+            'skip_commit_verification': False,
+            'skip_prs_with_missing_branches': True,
+            'create_closed_issues': True
+        },
+        'test_mode': {
+            'enabled': False,
+            'test_repo': {
+                'owner': 'your-test-owner',
+                'repository': 'your-test-repository'
+            }
+        }
+    }
+    
+    # Bitbucket Configuration with validation
+    print("=" * 70)
+    print("BITBUCKET CONFIGURATION")
+    print("=" * 70)
+    
+    bb_valid = False
+    while not bb_valid:
+        bb_workspace = input("Enter Bitbucket Workspace name: ").strip()
+        bb_repo = input("Enter Bitbucket Repository name: ").strip()
+        
+        if not bb_workspace or not bb_repo:
+            print("\n❌ Workspace and repository names cannot be empty. Please try again.\n")
+            continue
+        
+        print("\nChoose Bitbucket authentication method:")
+        print("  1. OAuth 2.0 (Key + Secret)")
+        print("  2. Bearer Token")
+        auth_choice = input("Enter choice (1 or 2): ").strip()
+        
+        config['bitbucket']['workspace'] = bb_workspace
+        config['bitbucket']['repository'] = bb_repo
+        
+        if auth_choice == '1':
+            bb_key = getpass.getpass("Enter Bitbucket OAuth Key: ").strip()
+            bb_secret = getpass.getpass("Enter Bitbucket OAuth Secret: ").strip()
+            
+            if not bb_key or not bb_secret:
+                print("\n❌ OAuth credentials cannot be empty. Please try again.\n")
+                continue
+            
+            config['bitbucket']['oauth_key'] = bb_key
+            config['bitbucket']['oauth_secret'] = bb_secret
+            auth_data = {'oauth_key': bb_key, 'oauth_secret': bb_secret}
+        else:
+            bb_token = getpass.getpass("Enter Bitbucket Token: ").strip()
+            
+            if not bb_token:
+                print("\n❌ Token cannot be empty. Please try again.\n")
+                continue
+            
+            config['bitbucket']['token'] = bb_token
+            auth_data = {'token': bb_token}
+        
+        # Validate Bitbucket credentials
+        print("\n🔍 Validating Bitbucket credentials...")
+        bb_valid, bb_message = validate_bitbucket_credentials(bb_workspace, bb_repo, auth_data)
+        
+        if bb_valid:
+            print(f"✅ {bb_message}\n")
+        else:
+            print(f"\n❌ {bb_message}")
+            print("Please try again.\n")
+            # Clear invalid credentials
+            if 'oauth_key' in config['bitbucket']:
+                del config['bitbucket']['oauth_key']
+                del config['bitbucket']['oauth_secret']
+            if 'token' in config['bitbucket']:
+                del config['bitbucket']['token']
+    
+    # GitHub Configuration with validation
+    print("=" * 70)
+    print("GITHUB CONFIGURATION")
+    print("=" * 70)
+    
+    gh_valid = False
+    while not gh_valid:
+        gh_owner = input("Enter GitHub Owner/Organization: ").strip()
+        gh_repo = input("Enter GitHub Repository name: ").strip()
+        gh_token = getpass.getpass("Enter GitHub Personal Access Token: ").strip()
+        
+        if not gh_owner or not gh_repo or not gh_token:
+            print("\n❌ Owner, repository, and token cannot be empty. Please try again.\n")
+            continue
+        
+        # Validate GitHub credentials
+        print("\n🔍 Validating GitHub credentials...")
+        gh_valid, gh_message = validate_github_credentials(gh_owner, gh_repo, gh_token)
+        
+        if gh_valid:
+            print(f"✅ {gh_message}\n")
+            config['github']['owner'] = gh_owner
+            config['github']['repository'] = gh_repo
+            config['github']['token'] = gh_token
+        else:
+            print(f"\n❌ {gh_message}")
+            print("Please try again.\n")
+    
+    # Save configuration
+    with open('config.yaml', 'w', encoding='utf-8') as f:
+        yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+    
+    print("=" * 70)
+    print("✅ Configuration saved to config.yaml")
+    print("=" * 70)
+    
+    # Create user_mapping.yaml if it doesn't exist
+    if not os.path.exists('user_mapping.yaml'):
+        if os.path.exists('user_mapping.template.yaml'):
+            shutil.copy('user_mapping.template.yaml', 'user_mapping.yaml')
+            print("✅ user_mapping.yaml created from template")
+            print("   Edit this file to map Bitbucket users to GitHub users")
+        else:
+            # Create basic user_mapping.yaml
+            with open('user_mapping.yaml', 'w', encoding='utf-8') as f:
+                f.write("# Bitbucket Username -> GitHub Username\n")
+                f.write("# Example:\n")
+                f.write("# john.doe: johndoe-github\n")
+            print("✅ user_mapping.yaml created")
+    
+    print("\n✅ Setup complete! You can now run the migration.")
+    print("=" * 70 + "\n")
+    return config
+
+
 # Configure logging
-def setup_logging(log_file: str = './logs/migration_summary.log'):
-    """Setup logging configuration"""
+def setup_logging(log_file: str = './logs/migration_summary.log', verbose: bool = False):
+    """Setup logging configuration for production-grade output"""
     # Ensure logs directory exists
     log_dir = os.path.dirname(log_file)
     if log_dir and not os.path.exists(log_dir):
         os.makedirs(log_dir, exist_ok=True)
     
-    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    # File logging - detailed technical logs
+    file_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(file_format))
+    
+    # Console logging - production-grade user-friendly output
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.DEBUG if verbose else logging.WARNING)
+    console_format = '%(message)s'
+    console_handler.setFormatter(logging.Formatter(console_format))
+    
+    # Configure root logger
     logging.basicConfig(
-        level=logging.INFO,
-        format=log_format,
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            logging.FileHandler(log_file, mode='a', encoding='utf-8')
-        ]
+        level=logging.DEBUG,
+        handlers=[file_handler, console_handler]
     )
+    
+    # Suppress verbose output from third-party libraries
+    logging.getLogger('urllib3').setLevel(logging.WARNING)
+    logging.getLogger('github').setLevel(logging.WARNING)
+    logging.getLogger('requests').setLevel(logging.WARNING)
 
 
 class PRMigrationOrchestrator:
     """Orchestrates the PR migration process"""
     
-    def __init__(self, config_file: str = "config.yaml", dry_run: bool = False, test_mode: bool = False):
+    def __init__(self, config_file: str = "config.yaml", dry_run: bool = False, test_mode: bool = False, pr_numbers: Optional[List[int]] = None):
         """
         Initialize the migration orchestrator
         
@@ -43,11 +277,13 @@ class PRMigrationOrchestrator:
             config_file: Path to configuration YAML file
             dry_run: If True, no changes will be made to GitHub
             test_mode: If True, use test repository from config
+            pr_numbers: Optional list of specific PR numbers to migrate
         """
         self.logger = logging.getLogger(__name__)
         self.config = self._load_config(config_file)
         self.dry_run = dry_run
         self.test_mode = test_mode
+        self.pr_numbers = pr_numbers
         
         if self.dry_run:
             self.logger.warning("\n" + "*" * 70)
@@ -78,6 +314,7 @@ class PRMigrationOrchestrator:
         
         # Initialize API clients
         # Support both OAuth (key/secret) and Bearer token authentication
+        bitbucket_token: Optional[str] = None
         if 'oauth_key' in self.config['bitbucket'] and 'oauth_secret' in self.config['bitbucket']:
             self.bitbucket_client = BitbucketClient(
                 workspace=self.config['bitbucket']['workspace'],
@@ -85,18 +322,31 @@ class PRMigrationOrchestrator:
                 oauth_key=self.config['bitbucket']['oauth_key'],
                 oauth_secret=self.config['bitbucket']['oauth_secret']
             )
+            # Get OAuth access token for image migration
+            bitbucket_token = self.bitbucket_client.access_token
         else:
             self.bitbucket_client = BitbucketClient(
                 workspace=self.config['bitbucket']['workspace'],
                 repository=self.config['bitbucket']['repository'],
                 token=self.config['bitbucket']['token']
             )
+            bitbucket_token = self.config['bitbucket']['token']
+        
+        # Get migration options (with defaults)
+        migration_options = self.config.get('migration_options', {})
+        skip_commit_verification = migration_options.get('skip_commit_verification', False)
+        skip_prs_with_missing_branches = migration_options.get('skip_prs_with_missing_branches', False)
+        self.create_closed_issues_enabled = migration_options.get('create_closed_issues', True)  # Default: True
         
         self.github_client = GitHubClient(
             token=self.config['github']['token'],
             owner=self.config['github']['owner'],
             repository=self.config['github']['repository'],
-            user_mapper=self.user_mapper
+            bitbucket_workspace=self.config['bitbucket']['workspace'],
+            bitbucket_repo=self.config['bitbucket']['repository'],
+            bitbucket_token=bitbucket_token,
+            skip_commit_verification=skip_commit_verification,
+            skip_prs_with_missing_branches=skip_prs_with_missing_branches
         )
         
         # Migration statistics
@@ -105,7 +355,9 @@ class PRMigrationOrchestrator:
             'open_prs': 0,
             'closed_prs': 0,
             'migrated_successfully': 0,
-            'migration_failed': 0
+            'migration_failed': 0,
+            'closed_issues_created': 0,
+            'closed_issues_failed': 0
         }
     
     def _enable_test_mode(self):
@@ -134,7 +386,9 @@ class PRMigrationOrchestrator:
             with open(config_file, 'r', encoding='utf-8') as f:
                 return yaml.safe_load(f)
         except FileNotFoundError:
+            # Config doesn't exist - this should be handled by main() before creating orchestrator
             self.logger.error(f"Configuration file not found: {config_file}")
+            self.logger.error("Please run the tool to create configuration interactively.")
             sys.exit(1)
         except Exception as e:
             self.logger.error(f"Error loading configuration: {e}")
@@ -192,6 +446,113 @@ class PRMigrationOrchestrator:
         
         return len(missing_fields) == 0 and len(empty_fields) == 0
     
+    def _validate_credentials(self) -> bool:
+        """
+        Validate API credentials for both Bitbucket and GitHub
+        
+        Returns:
+            True if all credentials are valid, False otherwise
+        """
+        import requests
+        from github import GithubException
+        
+        # Validate Bitbucket credentials
+        try:
+            print("   • Testing Bitbucket connection...")
+            
+            # Support both OAuth 2.0 and Bearer token
+            headers = {'Accept': 'application/json'}
+            bb_workspace = self.config['bitbucket']['workspace']
+            bb_repo = self.config['bitbucket']['repository']
+            
+            if 'oauth_key' in self.config['bitbucket'] and 'oauth_secret' in self.config['bitbucket']:
+                # Use OAuth 2.0 client credentials flow
+                oauth_key = self.config['bitbucket']['oauth_key']
+                oauth_secret = self.config['bitbucket']['oauth_secret']
+                
+                # Get access token
+                token_response = requests.post(
+                    "https://bitbucket.org/site/oauth2/access_token",
+                    auth=(oauth_key, oauth_secret),
+                    data={'grant_type': 'client_credentials'},
+                    timeout=10
+                )
+                
+                if token_response.status_code != 200:
+                    print(f"     ❌ Bitbucket OAuth authentication failed")
+                    print(f"     Check OAuth consumer credentials at:")
+                    print(f"     https://bitbucket.org/{bb_workspace}/workspace/settings/api")
+                    return False
+                
+                token_data = token_response.json()
+                access_token = token_data['access_token']
+                headers['Authorization'] = f'Bearer {access_token}'
+            else:
+                # Use Bearer token directly
+                bb_token = self.config['bitbucket']['token']
+                headers['Authorization'] = f'Bearer {bb_token}'
+            
+            # Test API call to verify authentication
+            test_url = f"https://api.bitbucket.org/2.0/repositories/{bb_workspace}/{bb_repo}"
+            response = requests.get(test_url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                print(f"     ✓ Bitbucket: Connected to {bb_workspace}/{bb_repo}")
+            elif response.status_code == 401:
+                print(f"     ❌ Bitbucket: Authentication failed (401 Unauthorized)")
+                print(f"     Token is invalid or lacks permissions")
+                return False
+            elif response.status_code == 404:
+                print(f"     ❌ Bitbucket: Repository not found")
+                print(f"     Workspace: {bb_workspace}, Repository: {bb_repo}")
+                return False
+            else:
+                print(f"     ❌ Bitbucket: Unexpected error (HTTP {response.status_code})")
+                return False
+                
+        except requests.exceptions.Timeout:
+            print(f"     ❌ Bitbucket: Connection timeout")
+            return False
+        except requests.exceptions.ConnectionError:
+            print(f"     ❌ Bitbucket: Connection error. Check your internet connection")
+            return False
+        except Exception as e:
+            print(f"     ❌ Bitbucket: {str(e)}")
+            return False
+        
+        # Validate GitHub credentials
+        gh_token = self.config['github']['token']
+        gh_owner = self.config['github']['owner']
+        gh_repo = self.config['github']['repository']
+        
+        try:
+            print("   • Testing GitHub connection...")
+            
+            from github import Auth
+            auth = Auth.Token(gh_token)
+            github = Github(auth=auth, timeout=10)
+            repo = github.get_repo(f"{gh_owner}/{gh_repo}")
+            
+            print(f"     ✓ GitHub: Connected to {gh_owner}/{gh_repo}")
+            
+        except GithubException as e:
+            if e.status == 401:
+                print(f"     ❌ GitHub: Authentication failed (401 Unauthorized)")
+                print(f"     Token is invalid or expired")
+                print(f"     Generate new token: https://github.com/settings/tokens")
+            elif e.status == 404:
+                print(f"     ❌ GitHub: Repository not found")
+                print(f"     Owner: {gh_owner}, Repository: {gh_repo}")
+            else:
+                error_msg = e.data.get('message', str(e)) if hasattr(e, 'data') and e.data else str(e)
+                print(f"     ❌ GitHub: {error_msg}")
+            return False
+        except Exception as e:
+            print(f"     ❌ GitHub: {str(e)}")
+            return False
+        
+        return True
+    
     def fetch_all_prs(self) -> List[PullRequest]:
         """
         Fetch all pull requests from Bitbucket
@@ -211,6 +572,39 @@ class PRMigrationOrchestrator:
         
         return all_prs
     
+    def fetch_specific_prs(self, pr_numbers: List[int]) -> List[PullRequest]:
+        """
+        Fetch specific pull requests by their numbers
+        
+        Args:
+            pr_numbers: List of PR numbers to fetch
+            
+        Returns:
+            List of PullRequest objects
+        """
+        prs = []
+        for pr_num in pr_numbers:
+            try:
+                pr = self.bitbucket_client.get_pull_request(pr_num)
+                if pr:
+                    prs.append(pr)
+                    self.logger.info(f"  ✓ Fetched PR #{pr_num}: {pr.title}")
+                else:
+                    self.logger.warning(f"  ✗ PR #{pr_num} not found")
+            except Exception as e:
+                self.logger.error(f"  ✗ Failed to fetch PR #{pr_num}: {e}")
+        
+        self.stats['total_prs'] = len(prs)
+        
+        # Categorize PRs
+        open_prs = [pr for pr in prs if pr.is_open()]
+        closed_prs = [pr for pr in prs if pr.is_closed()]
+        
+        self.stats['open_prs'] = len(open_prs)
+        self.stats['closed_prs'] = len(closed_prs)
+        
+        return prs
+    
     def separate_prs(self, all_prs: List[PullRequest]) -> Dict[str, List[PullRequest]]:
         """
         Separate PRs into open and closed categories
@@ -228,13 +622,62 @@ class PRMigrationOrchestrator:
     
     def log_closed_prs(self, closed_prs: List[PullRequest]):
         """
-        Log all closed PRs
+        Log all closed PRs to JSON
         
         Args:
             closed_prs: List of closed pull requests
         """
         for pr in closed_prs:
             self.pr_logger.log_closed_pr(pr)
+    
+    def create_closed_issues(self, closed_prs: List[PullRequest]):
+        """
+        Create closed issues in GitHub for closed Bitbucket PRs
+        
+        Args:
+            closed_prs: List of closed pull requests
+        """
+        if not closed_prs:
+            return
+        
+        # Check if feature is enabled
+        if not self.create_closed_issues_enabled:
+            print(f"\n⏭️  Skipping closed issues (disabled in config)")
+            print(f"   {len(closed_prs)} closed PRs logged to: {self.config['logging']['closed_pr_archive']}")
+            return
+        
+        print(f"\n📝 Creating GitHub issues for {len(closed_prs)} closed PRs...")
+        
+        # Progress bar for closed issues
+        with tqdm(total=len(closed_prs), desc="Creating issues", unit="issue", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]') as pbar:
+            for pr in closed_prs:
+                # Update description with current PR
+                pbar.set_postfix_str(f"PR #{pr.id}: {pr.title[:40]}..." if len(pr.title) > 40 else f"PR #{pr.id}: {pr.title}")
+                
+                if self.dry_run:
+                    self.stats['closed_issues_created'] += 1
+                    pbar.update(1)
+                    continue
+                
+                success, error_message = self.github_client.create_closed_issue(pr)
+                
+                if success:
+                    self.stats['closed_issues_created'] += 1
+                else:
+                    self.stats['closed_issues_failed'] += 1
+                    tqdm.write(f"   ⚠️  Failed: PR #{pr.id} - {error_message}")
+                    self.pr_logger.log_failed_pr(
+                        pr,
+                        reason=f"Failed to create closed issue: {error_message}",
+                        error_details=f"State: {pr.state}"
+                    )
+                
+                pbar.update(1)
+        
+        print(f"   ✓ Created {self.stats['closed_issues_created']} issues")
+        if self.stats['closed_issues_failed'] > 0:
+            print(f"   ⚠️  Failed: {self.stats['closed_issues_failed']} issues")
+
     
     def migrate_open_prs(self, open_prs: List[PullRequest]):
         """
@@ -246,91 +689,144 @@ class PRMigrationOrchestrator:
         if not open_prs:
             return
         
-        for i, pr in enumerate(open_prs, 1):
-            
-            if self.dry_run:
-                # Simulate migration without making changes
-                self.stats['migrated_successfully'] += 1
-                continue
-            
-            success, error_message = self.github_client.migrate_pull_request(pr)
-            
-            if success:
-                self.stats['migrated_successfully'] += 1
-            else:
-                self.stats['migration_failed'] += 1
-                self.pr_logger.log_failed_pr(
-                    pr,
-                    reason=error_message or "Migration failed",
-                    error_details=f"Source: {pr.source_branch} -> Destination: {pr.destination_branch}"
-                )
+        print(f"\n🔄 Migrating {len(open_prs)} open PRs...")
+        
+        # Progress bar for open PRs migration
+        with tqdm(total=len(open_prs), desc="Migrating PRs", unit="PR", ncols=100, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]') as pbar:
+            for pr in open_prs:
+                # Update description with current PR
+                pbar.set_postfix_str(f"PR #{pr.id}: {pr.title[:40]}..." if len(pr.title) > 40 else f"PR #{pr.id}: {pr.title}")
+                
+                if self.dry_run:
+                    # Simulate migration without making changes
+                    self.stats['migrated_successfully'] += 1
+                    pbar.update(1)
+                    continue
+                
+                success, error_message = self.github_client.migrate_pull_request(pr)
+                
+                if success:
+                    self.stats['migrated_successfully'] += 1
+                else:
+                    self.stats['migration_failed'] += 1
+                    tqdm.write(f"   ⚠️  Failed: PR #{pr.id} - {error_message}")
+                    self.pr_logger.log_failed_pr(
+                        pr,
+                        reason=error_message or "Migration failed",
+                        error_details=f"Source: {pr.source_branch} -> Destination: {pr.destination_branch}"
+                    )
+                
+                pbar.update(1)
+        
+        print(f"   ✓ Migrated {self.stats['migrated_successfully']} PRs successfully")
+        if self.stats['migration_failed'] > 0:
+            print(f"   ⚠️  Failed: {self.stats['migration_failed']} PRs")
     
     def print_summary(self):
         """Print final migration summary"""
         summary = self.pr_logger.get_summary()
         
-        self.logger.info("\n" + "=" * 70)
-        self.logger.info("MIGRATION SUMMARY")
-        self.logger.info("=" * 70)
-        self.logger.info(f"Total PRs processed: {self.stats['total_prs']}")
+        print("\n" + "=" * 70)
+        print("                        MIGRATION SUMMARY")
+        print("=" * 70)
+        print(f"\n📊 Total PRs Processed: {self.stats['total_prs']}")
         
-        self.logger.info(f"\n📂 Open PRs:")
-        self.logger.info(f"  - Total: {self.stats['open_prs']}")
-        self.logger.info(f"  - ✅ Successfully migrated: {self.stats['migrated_successfully']}")
-        self.logger.info(f"  - ❌ Failed: {self.stats['migration_failed']}")
-        
-        self.logger.info(f"\n📂 Closed PRs (Not Migrated - Logged):")
-        self.logger.info(f"  - Total: {self.stats['closed_prs']}")
-        self.logger.info(f"  - ✔️  Merged: {summary['merged_prs_count']}")
-        self.logger.info(f"  - ✖️  Declined: {summary['declined_prs_count']}")
-        self.logger.info(f"  - 🔄 Superseded: {summary['superseded_prs_count']}")
-        
-        self.logger.info(f"\n📄 Log Files:")
-        self.logger.info(f"  - Closed PRs (merged/declined/superseded): {self.config['logging']['closed_pr_archive']}")
-        
+        print(f"\n📂 OPEN PRs ({self.stats['open_prs']} total)")
+        print(f"   ✅ Successfully migrated: {self.stats['migrated_successfully']}")
         if self.stats['migration_failed'] > 0:
-            self.logger.info(f"  - Failed migrations: {self.config['logging']['failed_prs']}")
+            print(f"   ❌ Failed: {self.stats['migration_failed']}")
         
-        self.logger.info("=" * 70)
+        print(f"\n📂 CLOSED PRs ({self.stats['closed_prs']} total)")
+        print(f"   ✔️  Merged: {summary['merged_prs_count']}")
+        print(f"   ✖️  Declined: {summary['declined_prs_count']}")
+        if summary['superseded_prs_count'] > 0:
+            print(f"   🔄 Superseded: {summary['superseded_prs_count']}")
+        
+        if self.create_closed_issues_enabled:
+            print(f"\n   📝 GitHub Issues Created: {self.stats['closed_issues_created']}")
+            if self.stats['closed_issues_failed'] > 0:
+                print(f"   ⚠️  Issues Failed: {self.stats['closed_issues_failed']}")
+        
+        print(f"\n📄 Detailed Logs:")
+        print(f"   • Full log: {self.config['logging']['migration_summary']}")
+        print(f"   • Closed PRs: {self.config['logging']['closed_pr_archive']}")
+        
+        if self.stats['migration_failed'] > 0 or self.stats['closed_issues_failed'] > 0:
+            print(f"   • Failed migrations: {self.config['logging']['failed_prs']}")
+        
+        print("\n" + "=" * 70)
     
     def run(self):
         """Execute the full migration process"""
         try:
-            self.logger.info("\n" + "=" * 70)
-            self.logger.info("BITBUCKET TO GITHUB PR MIGRATION")
-            self.logger.info("=" * 70)
+            print("\n" + "=" * 70)
+            print("          BITBUCKET TO GITHUB PR MIGRATION TOOL")
+            print("=" * 70)
             
             # Configuration already validated in __init__
             
-            # Fetch all PRs
-            all_prs = self.fetch_all_prs()
+            # Validate credentials before proceeding
+            print("\n🔐 Validating credentials...")
+            if not self._validate_credentials():
+                print("\n❌ Credential validation failed. Please check your configuration.")
+                print("=" * 70 + "\n")
+                sys.exit(1)
+            print("   ✓ All credentials validated successfully\n")
+            
+            # Fetch PRs (all or specific numbers)
+            if self.pr_numbers:
+                print(f"\n🔍 Fetching specific PRs: {', '.join(map(str, self.pr_numbers))}")
+                all_prs = self.fetch_specific_prs(self.pr_numbers)
+            else:
+                print(f"\n🔍 Fetching pull requests from Bitbucket...")
+                print(f"   Repository: {self.bitbucket_client.workspace}/{self.bitbucket_client.repository}")
+                all_prs = self.fetch_all_prs()
             
             if not all_prs:
+                print("\n⚠️  No pull requests found to migrate")
                 return
+            
+            print(f"   ✓ Found {len(all_prs)} PRs")
             
             # Separate open and closed PRs
             categorized_prs = self.separate_prs(all_prs)
             
-            # Log closed PRs
+            open_count = len(categorized_prs['open'])
+            closed_count = len(categorized_prs['closed'])
+            
+            print(f"\n📊 PR Breakdown:")
+            print(f"   • Open PRs: {open_count}")
+            print(f"   • Closed PRs: {closed_count}")
+            
+            # Log closed PRs (always keep this for record-keeping)
             if categorized_prs['closed']:
+                print(f"\n📋 Archiving {closed_count} closed PRs...")
                 self.log_closed_prs(categorized_prs['closed'])
+                print(f"   ✓ Saved to: {self.config['logging']['closed_pr_archive']}")
+            
+            # Create closed issues in GitHub
+            if categorized_prs['closed']:
+                self.create_closed_issues(categorized_prs['closed'])
             
             # Migrate open PRs
             if categorized_prs['open']:
                 self.migrate_open_prs(categorized_prs['open'])
             else:
-                self.logger.info("\nNo open PRs to migrate")
+                print("\n✓ No open PRs to migrate")
             
             # Print summary
             self.print_summary()
             
-            self.logger.info(f"\nCompleted at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"\n✓ Migration completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print("=" * 70 + "\n")
         
         except KeyboardInterrupt:
-            self.logger.warning("\n\nMigration interrupted by user")
+            print("\n\n⚠️  Migration interrupted by user")
             sys.exit(1)
         except Exception as e:
-            self.logger.error(f"\nUnexpected error during migration: {e}", exc_info=True)
+            print(f"\n❌ Unexpected error during migration: {e}")
+            self.logger.error(f"Unexpected error during migration: {e}", exc_info=True)
+            print(f"\nCheck logs for details: {self.config['logging']['migration_summary']}")
             sys.exit(1)
 
 
@@ -340,12 +836,20 @@ def main():
     parser = argparse.ArgumentParser(
         description="Migrate pull requests from Bitbucket to GitHub",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
+        epilog="""Examples:
   # Test credentials (quick validation)
   python main.py --test-connection
   
-  # Normal migration
+  # Migrate specific PR
+  python main.py --pr-numbers 13
+  
+  # Migrate multiple specific PRs
+  python main.py --pr-numbers 13,14,15
+  
+  # Dry-run for specific PR
+  python main.py --pr-numbers 13 --dry-run
+  
+  # Normal migration (all PRs)
   python main.py
   
   # Dry-run mode (no changes made)
@@ -353,9 +857,6 @@ Examples:
   
   # Test mode (use test repository)
   python main.py --test-mode
-  
-  # Dry-run with test mode
-  python main.py --dry-run --test-mode
   
   # Custom config file
   python main.py --config custom_config.yaml
@@ -386,30 +887,57 @@ Examples:
         help='Path to configuration file (default: config.yaml)'
     )
     
+    parser.add_argument(
+        '--pr-numbers',
+        type=str,
+        help='Comma-separated list of PR numbers to migrate (e.g., "13" or "13,14,15")'
+    )
+    
     args = parser.parse_args()
     
-    # Setup logging
-    setup_logging()
+    # Check if config exists - if not, create it interactively
+    if not os.path.exists(args.config):
+        create_config_interactive()
     
-    print("\n" + "=" * 70)
-    print("  BITBUCKET TO GITHUB PR MIGRATION TOOL")
+    # Setup logging (verbose mode for debugging)
+    verbose = os.getenv('VERBOSE', '').lower() in ('true', '1', 'yes')
+    setup_logging(verbose=verbose)
+    
+    # Show mode indicators
     if args.test_connection:
-        print("  MODE: CONNECTION TEST")
-    if args.dry_run:
-        print("  MODE: DRY-RUN (No changes will be made)")
-    if args.test_mode:
-        print("  MODE: TEST (Using test repository)")
-    print("=" * 70 + "\n")
+        print("\n" + "=" * 70)
+        print("          CONNECTION TEST MODE")
+        print("=" * 70)
+    elif args.dry_run:
+        print("\n" + "=" * 70)
+        print("          DRY-RUN MODE (No changes will be made)")
+        print("=" * 70)
+    elif args.test_mode:
+        print("\n" + "=" * 70)
+        print("          TEST MODE (Using test repository)")
+        print("=" * 70)
     
     # Quick connection test mode
     if args.test_connection:
         test_credentials(args.config)
         return
     
+    # Parse PR numbers if provided
+    pr_numbers = None
+    if args.pr_numbers:
+        try:
+            pr_numbers = [int(num.strip()) for num in args.pr_numbers.split(',')]
+        except ValueError:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Invalid PR numbers format: {args.pr_numbers}")
+            logger.error("Expected format: --pr-numbers 13 or --pr-numbers 13,14,15")
+            return
+    
     orchestrator = PRMigrationOrchestrator(
         config_file=args.config,
         dry_run=args.dry_run,
-        test_mode=args.test_mode
+        test_mode=args.test_mode,
+        pr_numbers=pr_numbers
     )
     orchestrator.run()
 

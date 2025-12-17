@@ -1,0 +1,165 @@
+================================================================================
+  BITBUCKET TO GITHUB PR MIGRATION TOOL - USER GUIDE
+================================================================================
+
+WHAT THIS TOOL DOES:
+--------------------
+This tool automatically migrates Pull Requests (PRs) from Bitbucket to GitHub,
+including:
+  ✓ PR descriptions and metadata
+  ✓ Comments and discussions
+  ✓ Reviewers
+  ✓ Images
+  ✓ User mapping (Bitbucket users → GitHub users)
+
+
+PREREQUISITES:
+--------------
+Before running this tool, ensure:
+
+1. ✓ Your repository code is already migrated to GitHub
+2. ✓ All branches exist in GitHub
+3. ✓ You have admin access to both Bitbucket and GitHub repositories
+4. ✓ You have the following credentials ready:
+   
+   BITBUCKET:
+     - Workspace name
+     - Repository name
+     - OAuth Key + Secret OR Bearer Token
+   
+   GITHUB:
+     - Owner/Organization name
+     - Repository name
+     - Personal Access Token (with 'repo' scope)
+
+
+HOW TO GET CREDENTIALS:
+------------------------
+
+BITBUCKET TOKEN:
+  1. Go to: https://bitbucket.org/account/settings/api-tokens/
+  2. Click "Create token"
+  3. Give it a name (e.g., "PR Migration")
+  4. Select permissions: Repositories (Read)
+  5. Click "Create" and copy the token
+
+BITBUCKET OAUTH (Alternative):
+  1. Go to: https://bitbucket.org/{workspace}/workspace/settings/api
+  2. Click "Add consumer"
+  3. Give it a name and permissions: Repositories (Read)
+  4. Copy the Key and Secret
+
+GITHUB TOKEN:
+  1. Go to: https://github.com/settings/tokens
+  2. Click "Generate new token" → "Generate new token (classic)"
+  3. Give it a name (e.g., "PR Migration")
+  4. Select scope: ✓ repo (Full control of repositories)
+  5. Click "Generate token" and copy it immediately (shown only once!)
+
+
+FIRST RUN - SETUP:
+------------------
+When you run the tool for the first time, it will guide you through setup:
+
+1. Double-click PRMigrationTool.exe
+2. You'll see a configuration wizard
+3. Enter your credentials when prompted:
+   - Bitbucket workspace and repository (visible)
+   - Authentication method (OAuth or Token)
+   - Credentials (hidden as **** for security):
+     • OAuth Key (hidden)
+     • OAuth Secret (hidden)
+     • OR Bitbucket Token (hidden)
+   - GitHub owner and repository (visible)
+   - GitHub Personal Access Token (hidden as ****)
+
+4. The tool creates a config.yaml file automatically
+5. Setup is complete!
+
+NOTE: Sensitive credentials (tokens, keys, secrets) are hidden as you type
+      for security. This is normal - just type carefully!
+
+
+RUNNING THE MIGRATION:
+----------------------
+
+TEST CONNECTION (Recommended First):
+  PRMigrationTool.exe --test-connection
+  
+  This validates your credentials before migrating any PRs.
+
+DRY-RUN MODE (See what would happen):
+  PRMigrationTool.exe --dry-run
+  
+  This simulates the migration without making any changes to GitHub.
+
+FULL MIGRATION:
+  PRMigrationTool.exe
+  
+  This performs the actual migration.
+
+MIGRATE SPECIFIC PRs:
+  PRMigrationTool.exe --pr-numbers 13
+  PRMigrationTool.exe --pr-numbers 13,14,15
+  
+  Migrate only specific PR numbers.
+
+
+USER MAPPING (Optional but Recommended):
+-----------------------------------------
+To properly map Bitbucket users to GitHub users:
+
+1. After first run, edit: user_mapping.yaml
+2. Add mappings in format:
+   
+   bitbucket_username: github_username
+   
+   Example:
+   john.doe: johndoe-github
+   jane.smith: janesmith
+
+3. Save the file and run migration again
+
+
+OUTPUT AND LOGS:
+----------------
+The tool creates a 'logs' folder with:
+  - migration_summary.log - Detailed migration log
+  - closed_prs.json - Record of closed PRs
+  - failed_prs.json - Any PRs that failed to migrate
+
+
+TROUBLESHOOTING:
+----------------
+
+ISSUE: "Configuration file not found"
+→ Delete config.yaml and run again to recreate it
+
+ISSUE: "Authentication failed (401)"
+→ Your token is invalid or expired. Generate a new one.
+
+ISSUE: "Repository not found (404)"
+→ Check workspace/owner and repository names are correct
+
+ISSUE: "PR migration failed - branch not found"
+→ Ensure all branches exist in GitHub before migrating
+
+ISSUE: "Rate limit exceeded"
+→ The tool has automatic retry. Just wait, it will continue.
+
+
+NEED HELP?
+----------
+If you encounter issues:
+  1. Check the logs/migration_summary.log file
+  2. Verify all prerequisites are met
+  3. Contact support with the error message from logs
+
+
+================================================================================
+  IMPORTANT: KEEP YOUR CREDENTIALS SECURE
+================================================================================
+  - Never share your config.yaml file (contains tokens)
+  - Tokens have full access to your repositories
+  - Delete tokens after migration if no longer needed
+================================================================================

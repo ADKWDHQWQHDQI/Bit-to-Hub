@@ -1,0 +1,12 @@
+# Build Requirements
+# Install these packages before building the .exe
+
+# Core dependencies (from requirements.txt)
+requests>=2.31.0
+PyGithub>=2.1.1
+PyYAML>=6.0.1
+python-dateutil>=2.8.2
+tenacity>=8.2.3
+
+# Build tools
+pyinstaller>=6.0.0

@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from dateutil import parser
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-from models import PullRequest, PRComment, PRReviewer
+from models import PullRequest, PRComment, PRReviewer, PRTask
 
 
 logger = logging.getLogger(__name__)
@@ -129,6 +129,51 @@ class BitbucketClient:
         
         return results
     
+    def get_pull_request_data(self, pr_number: int) -> Optional[dict]:
+        """
+        Fetch raw PR data from Bitbucket API
+        
+        Args:
+            pr_number: The PR number to fetch
+            
+        Returns:
+            Raw PR data dict or None if not found
+        """
+        url = f"{self.BASE_URL}/repositories/{self.workspace}/{self.repository}/pullrequests/{pr_number}"
+        
+        try:
+            response = self.session.get(url)
+            response.raise_for_status()
+            return response.json()
+            
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                logger.warning(f"PR #{pr_number} not found in {self.workspace}/{self.repository}")
+                return None
+            else:
+                logger.error(f"Failed to fetch PR #{pr_number}: {e}")
+                return None
+        except Exception as e:
+            logger.error(f"Error fetching PR #{pr_number}: {e}")
+            return None
+    
+    def get_pull_request(self, pr_number: int) -> Optional[PullRequest]:
+        """
+        Fetch a specific pull request by its number
+        
+        Args:
+            pr_number: The PR number to fetch
+            
+        Returns:
+            PullRequest object or None if not found
+        """
+        pr_data = self.get_pull_request_data(pr_number)
+        if pr_data:
+            # Parse and return the PR (skip fetching full details since we already have them)
+            pr = self._parse_pull_request(pr_data, fetch_full_details=False)
+            return pr
+        return None
+    
     def get_all_pull_requests(self, state: Optional[str] = None) -> List[PullRequest]:
         """
         Fetch all pull requests from the repository
@@ -164,9 +209,16 @@ class BitbucketClient:
         
         return pull_requests
     
-    def _parse_pull_request(self, pr_data: dict) -> PullRequest:
+    def _parse_pull_request(self, pr_data: dict, fetch_full_details: bool = True) -> PullRequest:
         """Parse Bitbucket PR data into PullRequest object"""
         pr_id = pr_data['id']
+        
+        # If we don't have reviewers/participants data (from paginated list), fetch full PR details
+        if fetch_full_details and ('reviewers' not in pr_data or 'participants' not in pr_data):
+            logger.info(f"Fetching full PR details for PR #{pr_id} (reviewers/participants missing from summary)")
+            full_pr_data = self.get_pull_request_data(pr_id)
+            if full_pr_data:
+                pr_data = full_pr_data
         
         # Get author info (Issue #5: Prioritize username over display_name)
         author_data = pr_data.get('author', {})
@@ -239,6 +291,7 @@ class BitbucketClient:
         pr.comments = self._get_pr_comments(pr_id)
         pr.reviewers = self._get_pr_reviewers(pr_data)
         pr.commits = self._get_pr_commits(pr_id)
+        pr.tasks = self._get_pr_tasks(pr_id)
         
         return pr
     
@@ -250,6 +303,15 @@ class BitbucketClient:
             comments_data = self._get_paginated(url)
             comments = []
             
+            # First pass: Build a mapping of comment IDs to authors for parent lookups
+            comment_authors = {}
+            for comment_data in comments_data:
+                comment_id = comment_data['id']
+                author_data = comment_data.get('user', {})
+                author = author_data.get('nickname') or author_data.get('display_name') or author_data.get('account_id', 'unknown')
+                comment_authors[comment_id] = author
+            
+            # Second pass: Process all comments with correct parent author lookup
             for comment_data in comments_data:
                 # Get author info (Issue #5: Prioritize username over display_name)
                 author_data = comment_data.get('user', {})
@@ -257,15 +319,47 @@ class BitbucketClient:
                 author = author_data.get('nickname') or author_data.get('display_name') or author_data.get('account_id', 'unknown')
                 author_email = author_data.get('account_id')
                 
+                # Extract parent comment information (for replies)
+                parent_id = None
+                parent_author = None
+                if comment_data.get('parent'):
+                    parent_id = comment_data['parent'].get('id')
+                    # Look up parent author from our mapping (more reliable than nested API data)
+                    parent_author = comment_authors.get(parent_id, 'Unknown User')
+                    logger.debug(f"Comment {comment_data['id']} is a reply to comment {parent_id} by {parent_author}")
+                
+                # Extract inline comment data (file, line numbers)
+                inline = None
+                if comment_data.get('inline'):
+                    inline_data = comment_data['inline']
+                    inline = {
+                        'path': inline_data.get('path', ''),
+                        'from': inline_data.get('from'),
+                        'to': inline_data.get('to')
+                    }
+                
+                # Extract attachments from comment (separate from inline markdown images)
+                attachments = []
+                if comment_data.get('links') and comment_data['links'].get('attachments'):
+                    # Fetch attachments for this comment
+                    attachments = self._get_comment_attachments(pr_id, comment_data['id'])
+                
                 comment = PRComment(
                     id=comment_data['id'],
                     author=author,
                     author_email=author_email,
                     content=comment_data['content']['raw'],
                     created_date=parser.parse(comment_data['created_on']),
-                    updated_date=parser.parse(comment_data['updated_on']) if comment_data.get('updated_on') else None
+                    updated_date=parser.parse(comment_data['updated_on']) if comment_data.get('updated_on') else None,
+                    inline=inline,
+                    parent_id=parent_id,
+                    parent_author=parent_author,
+                    attachments=attachments
                 )
                 comments.append(comment)
+            
+            # Sort comments by date
+            comments.sort(key=lambda x: x.created_date)
             
             logger.debug(f"Fetched {len(comments)} comments")
             return comments
@@ -274,23 +368,35 @@ class BitbucketClient:
             logger.error(f"Failed to fetch comments for PR #{pr_id}: {e}")
             return []
     
+    
     def _get_pr_reviewers(self, pr_data: dict) -> List[PRReviewer]:
         """Extract reviewers from PR data"""
         reviewers = []
+        reviewer_usernames_seen = set()  # Track to avoid duplicates
         
-        for participant in pr_data.get('participants', []):
-            if participant.get('role') in ['REVIEWER', 'PARTICIPANT']:
-                user_data = participant.get('user', {})
-                # Priority: nickname (username) > display_name > account_id (Issue #5)
-                username = user_data.get('nickname') or user_data.get('display_name') or user_data.get('account_id', 'unknown')
-                email = user_data.get('account_id')
-                
-                # Get approval status
+        # Log what we're processing
+        logger.info(f"Extracting reviewers from PR data. Top-level 'reviewers': {len(pr_data.get('reviewers', []))}, 'participants': {len(pr_data.get('participants', []))}")
+        
+        # First, extract from the top-level 'reviewers' array (explicitly assigned reviewers)
+        for reviewer_data in pr_data.get('reviewers', []):
+            user_data = reviewer_data if isinstance(reviewer_data, dict) and 'nickname' in reviewer_data else reviewer_data
+            # Priority: nickname (username) > display_name > account_id (Issue #5)
+            username = user_data.get('nickname') or user_data.get('display_name') or user_data.get('account_id', 'unknown')
+            email = user_data.get('account_id')
+            
+            if username not in reviewer_usernames_seen:
+                reviewer_usernames_seen.add(username)
+                # Check participants for approval status
                 approval_status = None
-                if participant.get('approved'):
-                    approval_status = 'approved'
-                elif participant.get('state') == 'changes_requested':
-                    approval_status = 'changes_requested'
+                for participant in pr_data.get('participants', []):
+                    part_user = participant.get('user', {})
+                    part_username = part_user.get('nickname') or part_user.get('display_name') or part_user.get('account_id', 'unknown')
+                    if part_username == username:
+                        if participant.get('approved'):
+                            approval_status = 'approved'
+                        elif participant.get('state') == 'changes_requested':
+                            approval_status = 'changes_requested'
+                        break
                 
                 reviewer = PRReviewer(
                     username=username,
@@ -298,7 +404,34 @@ class BitbucketClient:
                     approval_status=approval_status
                 )
                 reviewers.append(reviewer)
+                logger.info(f"Added reviewer from 'reviewers' array: {username} (approval: {approval_status})")
         
+        # Then, extract from 'participants' array (people with REVIEWER role not already added)
+        for participant in pr_data.get('participants', []):
+            if participant.get('role') == 'REVIEWER':
+                user_data = participant.get('user', {})
+                # Priority: nickname (username) > display_name > account_id (Issue #5)
+                username = user_data.get('nickname') or user_data.get('display_name') or user_data.get('account_id', 'unknown')
+                email = user_data.get('account_id')
+                
+                if username not in reviewer_usernames_seen:
+                    reviewer_usernames_seen.add(username)
+                    # Get approval status
+                    approval_status = None
+                    if participant.get('approved'):
+                        approval_status = 'approved'
+                    elif participant.get('state') == 'changes_requested':
+                        approval_status = 'changes_requested'
+                    
+                    reviewer = PRReviewer(
+                        username=username,
+                        email=email,
+                        approval_status=approval_status
+                    )
+                    reviewers.append(reviewer)
+                    logger.info(f"Added reviewer from 'participants' array: {username} (approval: {approval_status})")
+        
+        logger.info(f"Total reviewers extracted: {len(reviewers)}")
         return reviewers
     
     def _get_pr_commits(self, pr_id: int) -> List[str]:
@@ -313,4 +446,123 @@ class BitbucketClient:
         
         except Exception as e:
             logger.error(f"Failed to fetch commits for PR #{pr_id}: {e}")
+            return []
+    
+    def _get_comment_attachments(self, pr_id: int, comment_id: int) -> List[dict]:
+        """
+        Fetch attachments for a specific comment
+        
+        Args:
+            pr_id: Pull request ID
+            comment_id: Comment ID
+            
+        Returns:
+            List of attachment dictionaries with 'name' and 'url'
+        """
+        url = f"{self.BASE_URL}/repositories/{self.workspace}/{self.repository}/pullrequests/{pr_id}/comments/{comment_id}/attachments"
+        
+        try:
+            response = self.session.get(url)
+            
+            # Check for payment required error (free tier limitation)
+            if response.status_code == 402:
+                logger.warning(
+                    f"Cannot access attachments for comment {comment_id}: "
+                    "Bitbucket workspace requires paid plan (Standard/Premium) to access file attachments via API. "
+                    "Inline images in markdown will still be migrated."
+                )
+                return []
+            
+            response.raise_for_status()
+            data = response.json()
+            
+            attachments_data = data.get('values', [])
+            attachments = []
+            
+            for attachment_data in attachments_data:
+                # Get attachment name and download URL
+                name = attachment_data.get('name', 'attachment')
+                # Use the 'href' from 'links.self' for download URL
+                download_url = attachment_data.get('links', {}).get('self', {}).get('href', '')
+                
+                if download_url:
+                    attachments.append({
+                        'name': name,
+                        'url': download_url
+                    })
+                    logger.info(f"Found attachment: {name}")
+            
+            return attachments
+        
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 402:
+                logger.warning(
+                    f"Cannot access attachments: Bitbucket free tier does not support file attachments API. "
+                    "Upgrade to Standard/Premium plan to migrate file attachments (PDF, DOC, ZIP, etc.)."
+                )
+            else:
+                logger.debug(f"No attachments found for comment {comment_id}: {e}")
+            return []
+        except Exception as e:
+            logger.debug(f"No attachments accessible for comment {comment_id}: {e}")
+            return []
+    
+    def _get_pr_tasks(self, pr_id: int) -> List[PRTask]:
+        """
+        Fetch tasks/todos for a pull request
+        
+        Args:
+            pr_id: Pull request ID
+            
+        Returns:
+            List of PRTask objects
+        """
+        url = f"{self.BASE_URL}/repositories/{self.workspace}/{self.repository}/pullrequests/{pr_id}/tasks"
+        
+        try:
+            tasks_data = self._get_paginated(url)
+            tasks = []
+            
+            for task_data in tasks_data:
+                # Get creator info
+                creator_data = task_data.get('creator', {})
+                creator = creator_data.get('nickname') or creator_data.get('display_name') or creator_data.get('account_id', 'unknown')
+                creator_email = creator_data.get('account_id')
+                
+                # Parse dates
+                created_date = parser.parse(task_data['created_on'])
+                updated_date = None
+                if task_data.get('updated_on'):
+                    updated_date = parser.parse(task_data['updated_on'])
+                
+                # Get comment ID if task is attached to a comment
+                comment_id = None
+                comment_data = task_data.get('comment')
+                if comment_data and 'id' in comment_data:
+                    comment_id = comment_data['id']
+                
+                # Extract content - it's a dict with 'raw', 'markup', 'html'
+                content_data = task_data.get('content', {})
+                if isinstance(content_data, dict):
+                    content = content_data.get('raw', '')
+                else:
+                    content = str(content_data)
+                
+                task = PRTask(
+                    id=task_data['id'],
+                    content=content,
+                    state=task_data.get('state', 'UNRESOLVED'),
+                    creator=creator,
+                    creator_email=creator_email,
+                    created_date=created_date,
+                    updated_date=updated_date,
+                    comment_id=comment_id
+                )
+                tasks.append(task)
+            
+            logger.debug(f"Fetched {len(tasks)} tasks")
+            return tasks
+        
+        except Exception as e:
+            logger.error(f"Failed to fetch tasks for PR #{pr_id}: {e}")
             return []

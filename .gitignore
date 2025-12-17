@@ -4,26 +4,16 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
+dist/
+build/
 *.egg
+.pytest_cache/
 
 # Virtual Environment
 venv/
-ENV/
 env/
+ENV/
 
 # IDE
 .vscode/
@@ -32,12 +22,19 @@ env/
 *.swo
 *~
 
+# Build artifacts
+*.spec
+PRMigrationTool.exe
+
 # Logs
+logs/*.json
+logs/*.log
 *.log
 
-# Configuration files with secrets
-config.local.yaml
-.env
+# Config files with credentials (keep templates only)
+config.yaml
+user_mapping.yaml
+*.backup
 
 # OS
 .DS_Store

@@ -1,0 +1,36 @@
+# Bitbucket Configuration
+bitbucket:
+  workspace: "your-workspace" # Your Bitbucket workspace name (e.g., "mycompany")
+  repository: "your-repository" # Your Bitbucket repository name (e.g., "my-app")
+  oauth_key: "YOUR_OAUTH_KEY" # OAuth Consumer Key
+  oauth_secret: "YOUR_OAUTH_SECRET" # OAuth Consumer Secret
+
+# GitHub Configuration
+github:
+  owner: "your-github-owner" # GitHub organization or username (e.g., "mycompany" or "myusername")
+  repository: "your-repository" # GitHub repository name (e.g., "my-app")
+  token: "YOUR_GITHUB_TOKEN" # GitHub Personal Access Token (Generate from: https://github.com/settings/tokens)
+  # Note: Token needs 'repo' scope for full repository access
+
+# Logging Configuration
+logging:
+  closed_pr_archive: "./logs/closed_prs.json" # All closed PRs (merged, declined, superseded) with status field
+  failed_prs: "./logs/failed_prs.json" # Open PRs that failed to migrate
+  migration_summary: "./logs/migration_summary.log" # Detailed migration logs
+  # Note: Using explicit relative paths (./logs/) prevents empty dirname issues
+  # You can also use absolute paths like: "C:/path/to/logs/file.json"
+
+# Migration Options (optional)
+migration_options:
+  skip_commit_verification: false # Set to true to skip commit SHA verification (useful if GitHub repo was rebased/squashed)
+  skip_prs_with_missing_branches: true # Set to true to skip PRs whose source branches don't exist in GitHub
+  create_closed_issues: true # Set to true to create closed issues in GitHub for closed Bitbucket PRs (merged/declined/superseded)
+  # Note: If false, closed PRs will only be logged to closed_pr_archive JSON file
+
+# Test Mode Configuration (optional)
+test_mode:
+  enabled: true # Set to true to enable test mode
+  test_repo:
+    owner: "ADKWDHQWQHDQI" # GitHub test repository owner (for dry-run testing)
+    repository: "docagent-foundry" # GitHub test repository name (for dry-run testing)
+  # When test_mode.enabled=true, PRs will be created in test_repo instead of the main repo
