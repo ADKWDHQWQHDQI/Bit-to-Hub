@@ -797,6 +797,59 @@ class PRMigrationOrchestrator:
         
         print("\n" + "=" * 70)
     
+    def _show_pr_summary(self, all_prs: List[PullRequest]):
+        """Display condensed PR summary at the top of migration"""
+        print("\n" + "=" * 70)
+        print("                    REPOSITORY SUMMARY")
+        print("=" * 70)
+        
+        # Basic categorization
+        open_prs = [pr for pr in all_prs if pr.is_open()]
+        closed_prs = [pr for pr in all_prs if pr.is_closed()]
+        merged_prs = [pr for pr in closed_prs if pr.state == 'MERGED']
+        declined_prs = [pr for pr in closed_prs if pr.state == 'DECLINED']
+        
+        # Quick statistics
+        total_comments = sum(len(pr.comments) for pr in all_prs)
+        total_participants = set()
+        total_reviewers = set()
+        total_tasks = sum(len(pr.tasks) for pr in all_prs)
+        
+        for pr in all_prs:
+            if pr.author:
+                total_participants.add(pr.author)
+            for comment in pr.comments:
+                if comment.author:
+                    total_participants.add(comment.author)
+            for reviewer in pr.reviewers:
+                if reviewer.username:
+                    total_reviewers.add(reviewer.username)
+                    total_participants.add(reviewer.username)
+        
+        # Display summary
+        print(f"\n📊 Pull Requests: {len(all_prs)} total")
+        print(f"   ├─ Open: {len(open_prs)}")
+        print(f"   └─ Closed: {len(closed_prs)}", end="")
+        if closed_prs:
+            print(f" (Merged: {len(merged_prs)}, Declined: {len(declined_prs)})")
+        else:
+            print()
+        
+        print(f"\n💬 Activity:")
+        print(f"   ├─ Comments: {total_comments}")
+        print(f"   ├─ Participants: {len(total_participants)} users")
+        print(f"   └─ Reviewers: {len(total_reviewers)} users")
+        
+        if total_tasks > 0:
+            resolved_tasks = sum(sum(1 for task in pr.tasks if task.state == 'RESOLVED') for pr in all_prs)
+            print(f"\n✅ Tasks: {total_tasks} total (Resolved: {resolved_tasks}, Pending: {total_tasks - resolved_tasks})")
+        
+        # Quick recommendations
+        if total_comments > 50 or len(total_participants) > 10:
+            print(f"\n💡 Note: This migration will process {total_comments} comments from {len(total_participants)} participants")
+        
+        print("=" * 70 + "\n")
+    
     def fetch_all_prs(self) -> List[PullRequest]:
         """
         Fetch all pull requests from Bitbucket
@@ -1032,15 +1085,14 @@ class PRMigrationOrchestrator:
             
             print(f"   ✓ Found {len(all_prs)} PRs")
             
+            # Show condensed summary
+            self._show_pr_summary(all_prs)
+            
             # Separate open and closed PRs
             categorized_prs = self.separate_prs(all_prs)
             
             open_count = len(categorized_prs['open'])
             closed_count = len(categorized_prs['closed'])
-            
-            print(f"\n📊 PR Breakdown:")
-            print(f"   • Open PRs: {open_count}")
-            print(f"   • Closed PRs: {closed_count}")
             
             # Log closed PRs (always keep this for record-keeping)
             if categorized_prs['closed']:
