@@ -59,6 +59,36 @@ def build_executable():
         '--collect-all=github',
         '--collect-all=yaml',
         
+        # Exclude unnecessary heavy packages
+        '--exclude-module=torch',
+        '--exclude-module=torchvision',
+        '--exclude-module=tensorflow',
+        '--exclude-module=scipy',
+        '--exclude-module=numpy',
+        '--exclude-module=pandas',
+        '--exclude-module=matplotlib',
+        '--exclude-module=PIL',
+        '--exclude-module=IPython',
+        '--exclude-module=jupyter',
+        '--exclude-module=notebook',
+        '--exclude-module=sklearn',
+        '--exclude-module=transformers',
+        '--exclude-module=tokenizers',
+        '--exclude-module=onnxruntime',
+        '--exclude-module=pyarrow',
+        '--exclude-module=fsspec',
+        '--exclude-module=pytest',
+        '--exclude-module=black',
+        '--exclude-module=jedi',
+        '--exclude-module=parso',
+        '--exclude-module=zmq',
+        '--exclude-module=tkinter',
+        '--exclude-module=_tkinter',
+        '--exclude-module=win32com',
+        '--exclude-module=pythoncom',
+        '--exclude-module=pywintypes',
+        '--exclude-module=lxml',
+        
         # Optimization
         '--noconfirm',                       # Replace output without confirmation
         '--clean',                           # Clean cache before building
